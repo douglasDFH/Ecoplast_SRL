@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ecoplast-green: #2E7D32;
+  --color-ecoplast-green-light: #4CAF50;
+  --color-ecoplast-green-dark: #1B5E20;
+  
+  --color-ecoplast-blue: #1565C0;
+  --color-ecoplast-blue-light: #1E88E5;
+  --color-ecoplast-blue-dark: #0D47A1;
+  
+  --color-ecoplast-gray: #455A64;
+  --color-ecoplast-gray-light: #607D8B;
+  --color-ecoplast-gray-dark: #263238;
+}
+

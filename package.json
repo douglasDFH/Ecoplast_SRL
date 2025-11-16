@@ -1,0 +1,39 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "start": "concurrently \"php artisan serve\" \"npm run dev\" \"php artisan queue:work\"",
+        "start:dev": "concurrently \"php artisan serve\" \"npm run dev\" \"php artisan queue:work --tries=1\"",
+        "start:test": "concurrently \"php artisan serve --host=127.0.0.1 --port=8000\" \"npm run dev\" \"php artisan queue:work --tries=1\"",
+        "queue": "php artisan queue:work",
+        "test": "npm run test:unit && npm run test:e2e",
+        "test:unit": "echo \"No unit tests configured yet\"",
+        "test:e2e": "echo \"No e2e tests configured yet\"",
+        "lint": "echo \"No linter configured yet\"",
+        "fresh": "php artisan migrate:fresh --seed"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.17",
+        "@tailwindcss/vite": "^4.0.0",
+        "autoprefixer": "^10.4.22",
+        "axios": "^1.13.2",
+        "concurrently": "^9.2.1",
+        "laravel-echo": "^2.2.6",
+        "laravel-vite-plugin": "^2.0.0",
+        "postcss": "^8.5.6",
+        "pusher-js": "^8.4.0",
+        "tailwindcss": "^4.1.17",
+        "vite": "^7.0.7"
+    },
+    "dependencies": {
+        "@vitejs/plugin-vue": "^6.0.1",
+        "chart.js": "^4.5.1",
+        "pinia": "^2.1.7",
+        "vue": "3.4",
+        "vue-chartjs": "^5.3.3",
+        "vue-router": "^4.6.3"
+    }
+}
