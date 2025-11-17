@@ -13,7 +13,11 @@ class RolePermissionController extends Controller
     // Listar roles
     public function indexRoles()
     {
-        return response()->json(Role::with('permissions')->get());
+        $roles = Role::with('permissions')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $roles
+        ]);
     }
 
     // Crear rol
@@ -53,7 +57,11 @@ class RolePermissionController extends Controller
     // Listar permisos
     public function indexPermissions()
     {
-        return response()->json(Permission::all());
+        $permissions = Permission::all();
+        return response()->json([
+            'success' => true,
+            'data' => $permissions
+        ]);
     }
 
     // Crear permiso

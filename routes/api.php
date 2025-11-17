@@ -41,17 +41,6 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::apiResource('usuarios', UserController::class);
     Route::post('usuarios/{usuario}/reset-password', [UserController::class, 'resetPassword']);
 
-    // Roles (simple endpoint para obtener listado)
-    Route::get('/roles', function () {
-        return response()->json([
-            'success' => true,
-            'data' => \Illuminate\Support\Facades\DB::table('roles')
-                ->select('id', 'nombre_rol', 'descripcion', 'nivel_acceso')
-                ->orderBy('nivel_acceso', 'desc')
-                ->get()
-        ]);
-    });
-
     // Dashboard Principal
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('dashboard/produccion-semanal', [DashboardController::class, 'produccionSemanal']);
