@@ -637,9 +637,7 @@ const insumosFiltrados = computed(() => {
 const cargarInsumos = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/insumos', {
-            params: { incluir: 'proveedor' }
-        });
+        const response = await api.get('/movimientos-inventario/resumen/inventario');
         insumos.value = response.data.data || response.data;
         calcularEstadisticas();
         cargarAlertasCriticas();

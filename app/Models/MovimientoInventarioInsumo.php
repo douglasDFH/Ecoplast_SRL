@@ -26,9 +26,14 @@ class MovimientoInventarioInsumo extends Model
         'insumo_id',
         'tipo_movimiento',
         'cantidad',
+        'lote',
+        'fecha_vencimiento',
+        'costo_unitario',
         'fecha_movimiento',
         'usuario_id',
         'orden_produccion_id',
+        'numero_documento',
+        'proveedor_id',
         'motivo',
     ];
 
@@ -64,5 +69,13 @@ class MovimientoInventarioInsumo extends Model
     public function ordenProduccion(): BelongsTo
     {
         return $this->belongsTo(OrdenProduccion::class, 'orden_produccion_id');
+    }
+
+    /**
+     * Relación: Un movimiento de entrada puede estar asociado a un proveedor.
+     */
+    public function proveedor(): BelongsTo
+    {
+        return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
 }

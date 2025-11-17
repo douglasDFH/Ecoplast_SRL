@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\TipoMaterialController;
 use App\Http\Controllers\Api\ProveedorController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\MovimientoInventarioController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -82,6 +83,12 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('insumos/por-categoria/{categoria}', [InsumoController::class, 'porCategoria']);
     Route::get('insumos/stock-bajo', [InsumoController::class, 'stockBajo']);
     Route::get('insumos/biodegradables', [InsumoController::class, 'biodegradables']);
+
+    // Rutas para Movimientos de Inventario
+    Route::apiResource('movimientos-inventario', MovimientoInventarioController::class)->only(['index', 'store', 'show']);
+    Route::get('movimientos-inventario/estadisticas/general', [MovimientoInventarioController::class, 'estadisticas']);
+    Route::get('movimientos-inventario/insumo/{insumoId}', [MovimientoInventarioController::class, 'porInsumo']);
+    Route::get('movimientos-inventario/resumen/inventario', [MovimientoInventarioController::class, 'resumen']);
 
     // Rutas para Productos Terminados biodegradables
     Route::apiResource('productos', ProductoTerminadoController::class);
