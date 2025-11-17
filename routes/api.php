@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\TurnoController;
 use App\Http\Controllers\Api\FormulacionController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\CategoriaInsumoController;
+use App\Http\Controllers\Api\TipoMaterialController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\UserController;
 
@@ -58,6 +59,13 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
 
     // Rutas para Categorías de Insumos
     Route::apiResource('categorias-insumos', CategoriaInsumoController::class);
+
+    // Rutas para Tipos de Materiales
+    Route::apiResource('tipos-materiales', TipoMaterialController::class);
+    Route::get('tipos-materiales/estadisticas/general', [TipoMaterialController::class, 'estadisticas']);
+    Route::get('tipos-materiales/clasificacion/{clasificacion}', [TipoMaterialController::class, 'porClasificacion']);
+    Route::get('tipos-materiales/biodegradables', [TipoMaterialController::class, 'biodegradables']);
+    Route::patch('tipos-materiales/{id}/toggle-activo', [TipoMaterialController::class, 'toggleActivo']);
 
     // Rutas para Insumos biodegradables
     Route::apiResource('insumos', InsumoController::class);

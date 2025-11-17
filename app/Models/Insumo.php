@@ -18,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $codigo_insumo
  * @property string $nombre_insumo
  * @property int $categoria_id
- * @property string $tipo_material ENUM: PLA, PHA, PBS, PBAT, Almidon, Celulosa, Aditivo, Pigmento, Otro
+ * @property int|null $tipo_material_id FK a tipos_materiales
+ * @property string $tipo_material ENUM: PLA, PHA, PBS, PBAT, Almidon, Celulosa, Aditivo, Pigmento, Otro (deprecado, usar tipo_material_id)
  * @property string $unidad_medida ENUM: kg, ton, litro, unidad
  * @property float|null $densidad g/cm³
  * @property float|null $temperatura_fusion °C
@@ -48,7 +49,8 @@ class Insumo extends Model
         'codigo_insumo',
         'nombre_insumo',
         'categoria_id',
-        'tipo_material',
+        'tipo_material_id',
+        'tipo_material', // Mantener temporalmente para compatibilidad
         'unidad_medida',
         'densidad',
         'temperatura_fusion',
@@ -97,6 +99,14 @@ class Insumo extends Model
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaInsumo::class, 'categoria_id');
+    }
+
+    /**
+     * Tipo de material de este insumo.
+     */
+    public function tipoMaterial(): BelongsTo
+    {
+        return $this->belongsTo(TipoMaterial::class, 'tipo_material_id');
     }
 
     /**
@@ -245,6 +255,12 @@ class Insumo extends Model
      */
     public function esBiodegradable(): bool
     {
+        // Usar la relación si existe
+        if ($this->tipo_material_id && $this->relationLoaded('tipoMaterial')) {
+            return $this->tipoMaterial->clasificacion === 'Polímero Biodegradable';
+        }
+
+        // Fallback al ENUM para compatibilidad
         return in_array($this->tipo_material, ['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa']);
     }
 

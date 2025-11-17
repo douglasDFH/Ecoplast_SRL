@@ -28,14 +28,17 @@ class InsumoController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Insumo::with('categoria');
+        $query = Insumo::with(['categoria', 'tipoMaterial']);
 
         // Filtros
         if ($request->has('categoria_id')) {
             $query->where('categoria_id', $request->categoria_id);
         }
 
-        if ($request->has('tipo_material')) {
+        // Filtro por tipo de material (soporta ambos: ENUM y FK)
+        if ($request->has('tipo_material_id')) {
+            $query->where('tipo_material_id', $request->tipo_material_id);
+        } elseif ($request->has('tipo_material')) {
             $query->where('tipo_material', $request->tipo_material);
         }
 
@@ -84,7 +87,8 @@ class InsumoController extends Controller
             'codigo_insumo' => 'required|string|max:50|unique:insumos',
             'nombre_insumo' => 'required|string|max:150',
             'categoria_id' => 'required|exists:categorias_insumos,id',
-            'tipo_material' => ['required', Rule::in(['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa', 'Aditivo', 'Pigmento', 'Otro'])],
+            'tipo_material_id' => 'required|exists:tipos_materiales,id',
+            'tipo_material' => ['nullable', Rule::in(['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa', 'Aditivo', 'Pigmento', 'Otro'])], // Mantener para compatibilidad
             'unidad_medida' => ['required', Rule::in(['kg', 'ton', 'litro', 'unidad'])],
             'densidad' => 'nullable|numeric|min:0|max:10',
             'temperatura_fusion' => 'nullable|numeric|min:0|max:500',
@@ -122,7 +126,7 @@ class InsumoController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $insumo->load('categoria'),
+                'data' => $insumo->load(['categoria', 'tipoMaterial']),
                 'message' => 'Insumo creado exitosamente'
             ], 201);
 
@@ -140,7 +144,7 @@ class InsumoController extends Controller
      */
     public function show(Insumo $insumo): JsonResponse
     {
-        $insumo->load('categoria');
+        $insumo->load(['categoria', 'tipoMaterial']);
 
         // Añadir información calculada
         $insumo->estado_stock = $this->calcularEstadoStock($insumo);
@@ -166,7 +170,8 @@ class InsumoController extends Controller
             'codigo_insumo' => ['sometimes', 'string', 'max:50', Rule::unique('insumos')->ignore($insumo->id)],
             'nombre_insumo' => 'sometimes|string|max:150',
             'categoria_id' => 'sometimes|exists:categorias_insumos,id',
-            'tipo_material' => ['sometimes', Rule::in(['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa', 'Aditivo', 'Pigmento', 'Otro'])],
+            'tipo_material_id' => 'sometimes|exists:tipos_materiales,id',
+            'tipo_material' => ['sometimes', Rule::in(['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa', 'Aditivo', 'Pigmento', 'Otro'])], // Mantener para compatibilidad
             'unidad_medida' => ['sometimes', Rule::in(['kg', 'ton', 'litro', 'unidad'])],
             'densidad' => 'nullable|numeric|min:0|max:10',
             'temperatura_fusion' => 'nullable|numeric|min:0|max:500',
@@ -205,7 +210,7 @@ class InsumoController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $insumo->load('categoria'),
+                'data' => $insumo->load(['categoria', 'tipoMaterial']),
                 'message' => 'Insumo actualizado exitosamente'
             ]);
 

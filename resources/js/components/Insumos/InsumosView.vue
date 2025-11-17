@@ -81,20 +81,14 @@
                         </option>
                     </select>
                     <select
-                        v-model="filtros.tipo_material"
+                        v-model="filtros.tipo_material_id"
                         class="modern-input px-4 py-2.5 rounded-xl"
                         style="background: #F8FAFC; border: 2px solid #E2E8F0;"
                     >
                         <option value="">Todos los tipos</option>
-                        <option value="PLA">PLA</option>
-                        <option value="PHA">PHA</option>
-                        <option value="PBS">PBS</option>
-                        <option value="PBAT">PBAT</option>
-                        <option value="Almidon">Almidón</option>
-                        <option value="Celulosa">Celulosa</option>
-                        <option value="Aditivo">Aditivo</option>
-                        <option value="Pigmento">Pigmento</option>
-                        <option value="Otro">Otro</option>
+                        <option v-for="tipo in tiposMateriales" :key="tipo.id" :value="tipo.id">
+                            {{ tipo.nombre }}
+                        </option>
                     </select>
                 </div>
                 <div class="flex gap-3">
@@ -167,8 +161,8 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                                    :style="getTipoMaterialBadgeStyle(insumo.tipo_material)">
-                                    {{ insumo.tipo_material }}
+                                    :style="getTipoMaterialBadgeStyle(insumo.tipo_material_relacion)">
+                                    {{ insumo.tipo_material_relacion?.codigo || insumo.tipo_material || 'N/A' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
@@ -244,6 +238,7 @@ import ModalInsumo from './ModalInsumo.vue';
 
 const insumos = ref([]);
 const categorias = ref([]);
+const tiposMateriales = ref([]);
 const loading = ref(false);
 const mostrarModal = ref(false);
 const insumoSeleccionado = ref(null);
@@ -251,7 +246,7 @@ const insumoSeleccionado = ref(null);
 const filtros = ref({
     busqueda: '',
     categoria_id: '',
-    tipo_material: ''
+    tipo_material_id: ''
 });
 
 // Computed properties
@@ -264,8 +259,8 @@ const insumosFiltrados = computed(() => {
         const matchCategoria = !filtros.value.categoria_id ||
             insumo.categoria_id == filtros.value.categoria_id;
 
-        const matchTipo = !filtros.value.tipo_material ||
-            insumo.tipo_material === filtros.value.tipo_material;
+        const matchTipo = !filtros.value.tipo_material_id ||
+            insumo.tipo_material_id == filtros.value.tipo_material_id;
 
         return matchBusqueda && matchCategoria && matchTipo;
     });
@@ -276,7 +271,8 @@ const insumosStockBajo = computed(() =>
 );
 
 const insumosBiodegradables = computed(() =>
-    insumos.value.filter(i => ['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa'].includes(i.tipo_material)).length
+    insumos.value.filter(i => i.tipo_material_relacion?.clasificacion === 'Polímero Biodegradable' ||
+                              ['PLA', 'PHA', 'PBS', 'PBAT', 'Almidon', 'Celulosa'].includes(i.tipo_material)).length
 );
 
 const insumosActivos = computed(() =>
@@ -289,7 +285,11 @@ const loadInsumos = async () => {
     try {
         const response = await api.get('/insumos');
         if (response.data && response.data.data && response.data.data.data) {
-            insumos.value = response.data.data.data;
+            // Laravel devuelve las relaciones en camelCase: tipoMaterial
+            insumos.value = response.data.data.data.map(insumo => ({
+                ...insumo,
+                tipo_material_relacion: insumo.tipo_material || insumo.tipoMaterial // Soportar ambos formatos
+            }));
         } else {
             insumos.value = [];
         }
@@ -312,6 +312,22 @@ const loadCategorias = async () => {
     } catch (error) {
         console.error('Error al cargar categorías:', error);
         categorias.value = [];
+    }
+};
+
+const loadTiposMateriales = async () => {
+    try {
+        const response = await api.get('/tipos-materiales', {
+            params: { all: true, activo: true }
+        });
+        if (response.data && response.data.data) {
+            tiposMateriales.value = response.data.data;
+        } else {
+            tiposMateriales.value = [];
+        }
+    } catch (error) {
+        console.error('Error al cargar tipos de materiales:', error);
+        tiposMateriales.value = [];
     }
 };
 
@@ -378,7 +394,7 @@ const limpiarFiltros = () => {
     filtros.value = {
         busqueda: '',
         categoria_id: '',
-        tipo_material: ''
+        tipo_material_id: ''
     };
 };
 
@@ -391,7 +407,13 @@ const getStockClass = (insumo) => {
     return 'text-green-600';
 };
 
-const getTipoMaterialBadgeStyle = (tipo) => {
+const getTipoMaterialBadgeStyle = (tipoRelacion) => {
+    // Si tiene relación con tipo_material, usar su color
+    if (tipoRelacion && tipoRelacion.color_referencia) {
+        return `background: ${tipoRelacion.color_referencia}; color: #374151;`;
+    }
+
+    // Fallback para compatibilidad con ENUM legacy
     const styles = {
         'PLA': 'background: #DBEAFE; color: #1E40AF;',
         'PHA': 'background: #D1FAE5; color: #065F46;',
@@ -403,13 +425,14 @@ const getTipoMaterialBadgeStyle = (tipo) => {
         'Pigmento': 'background: #FEF3C7; color: #78350F;',
         'Otro': 'background: #F3F4F6; color: #374151;'
     };
-    return styles[tipo] || 'background: #F3F4F6; color: #374151;';
+    return styles[tipoRelacion] || 'background: #F3F4F6; color: #374151;';
 };
 
 // Lifecycle
 onMounted(() => {
     loadInsumos();
     loadCategorias();
+    loadTiposMateriales();
 });
 </script>
 

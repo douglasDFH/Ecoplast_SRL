@@ -12,6 +12,7 @@ import UsuariosView from './components/Usuarios/UsuariosView.vue';
 import RolesPermisosView from './components/RolesPermisos/RolesPermisosView.vue';
 import InsumosView from './components/Insumos/InsumosView.vue';
 import CategoriasInsumosView from './components/Insumos/CategoriasInsumosView.vue';
+import TiposMaterialesView from './components/TiposMateriales/TiposMaterialesView.vue';
 
 const routes = [
     {
@@ -78,6 +79,11 @@ const routes = [
         path: '/categorias-insumos',
         name: 'categorias-insumos',
         component: CategoriasInsumosView,
+    },
+    {
+        path: '/tipos-materiales',
+        name: 'tipos-materiales',
+        component: TiposMaterialesView,
     },
 ];
 

@@ -76,21 +76,15 @@
                             Tipo de Material *
                         </label>
                         <select
-                            v-model="form.tipo_material"
+                            v-model="form.tipo_material_id"
                             class="modern-input w-full px-4 py-2.5 rounded-xl"
                             style="background: #F8FAFC; border: 2px solid #E2E8F0;"
                             required
                         >
                             <option value="">Seleccionar tipo...</option>
-                            <option value="PLA">PLA</option>
-                            <option value="PHA">PHA</option>
-                            <option value="PBS">PBS</option>
-                            <option value="PBAT">PBAT</option>
-                            <option value="Almidon">Almidón</option>
-                            <option value="Celulosa">Celulosa</option>
-                            <option value="Aditivo">Aditivo</option>
-                            <option value="Pigmento">Pigmento</option>
-                            <option value="Otro">Otro</option>
+                            <option v-for="tipo in tiposMateriales" :key="tipo.id" :value="tipo.id">
+                                {{ tipo.nombre }}
+                            </option>
                         </select>
                     </div>
 
@@ -277,7 +271,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     insumo: {
@@ -296,7 +291,7 @@ const form = ref({
     codigo_insumo: '',
     nombre_insumo: '',
     categoria_id: '',
-    tipo_material: '',
+    tipo_material_id: '',
     unidad_medida: 'kg',
     densidad: null,
     temperatura_fusion: null,
@@ -310,6 +305,25 @@ const form = ref({
 
 const saving = ref(false);
 const errorMsg = ref('');
+const tiposMateriales = ref([]);
+
+// Cargar tipos de materiales
+const cargarTiposMateriales = async () => {
+    try {
+        const response = await axios.get('/api/tipos-materiales', {
+            params: { all: true, activo: true }
+        });
+        if (response.data && response.data.data) {
+            tiposMateriales.value = response.data.data;
+        }
+    } catch (error) {
+        console.error('Error al cargar tipos de materiales:', error);
+    }
+};
+
+onMounted(() => {
+    cargarTiposMateriales();
+});
 
 // Watch para cargar datos cuando se edita
 watch(() => props.insumo, (newInsumo) => {
@@ -318,7 +332,7 @@ watch(() => props.insumo, (newInsumo) => {
             codigo_insumo: newInsumo.codigo_insumo || '',
             nombre_insumo: newInsumo.nombre_insumo || '',
             categoria_id: newInsumo.categoria_id || '',
-            tipo_material: newInsumo.tipo_material || '',
+            tipo_material_id: newInsumo.tipo_material_id || '',
             unidad_medida: newInsumo.unidad_medida || 'kg',
             densidad: newInsumo.densidad || null,
             temperatura_fusion: newInsumo.temperatura_fusion || null,
@@ -334,7 +348,7 @@ watch(() => props.insumo, (newInsumo) => {
             codigo_insumo: '',
             nombre_insumo: '',
             categoria_id: '',
-            tipo_material: '',
+            tipo_material_id: '',
             unidad_medida: 'kg',
             densidad: null,
             temperatura_fusion: null,
@@ -367,7 +381,7 @@ const handleSubmit = async () => {
         return;
     }
 
-    if (!form.value.tipo_material) {
+    if (!form.value.tipo_material_id) {
         errorMsg.value = 'El tipo de material es obligatorio';
         return;
     }

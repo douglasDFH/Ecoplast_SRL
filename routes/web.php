@@ -63,5 +63,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/categorias-insumos', function () {
         return view('dashboard');
     });
+
+    Route::get('/tipos-materiales', function () {
+        return view('dashboard');
+    });
 });
 
