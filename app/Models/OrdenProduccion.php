@@ -95,27 +95,7 @@ class OrdenProduccion extends Model
 
     public function registrosProduccion(): HasMany
     {
-        return $this->hasMany(RegistroProduccion::class, 'orden_produccion_id');
-    }
-
-    public function paradasProduccion(): HasMany
-    {
-        return $this->hasMany(ParadaProduccion::class, 'orden_produccion_id');
-    }
-
-    public function inspeccionesCalidad(): HasMany
-    {
-        return $this->hasMany(InspeccionCalidad::class, 'orden_produccion_id');
-    }
-
-    public function movimientosInsumos(): HasMany
-    {
-        return $this->hasMany(MovimientoInventarioInsumo::class, 'orden_produccion_id');
-    }
-
-    public function movimientosProductos(): HasMany
-    {
-        return $this->hasMany(MovimientoInventarioProducto::class, 'orden_produccion_id');
+        return $this->hasMany(RegistroProduccion::class, 'orden_id');
     }
 
     // ==================== SCOPES ====================

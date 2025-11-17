@@ -172,7 +172,7 @@ class OrdenProduccionController extends Controller
     }
 
     /**
-     * Mostrar una orden específica con detalles biodegradables
+     * Mostrar una orden específica con detalles
      */
     public function show(OrdenProduccion $orden): JsonResponse
     {
@@ -181,27 +181,15 @@ class OrdenProduccionController extends Controller
             'maquina',
             'operador',
             'supervisor',
-            'creador',
-            'registrosProduccion',
-            'paradasProduccion',
-            'inspeccionesCalidad'
+            'registrosProduccion'
         ]);
 
-        // Información biodegradable calculada
-        $orden->eficiencia_produccion = $this->calcularEficienciaProduccion($orden);
-        $orden->tiempo_restante = $this->calcularTiempoRestante($orden);
-        $orden->progreso_estimado = $this->calcularProgresoEstimado($orden);
-        $orden->material_biodegradable = $orden->productoTerminado->material_principal ?? null;
-        $orden->certificado_compostable = $orden->productoTerminado->certificacion_compostable ?? null;
-        $orden->tiempo_compostaje = $orden->productoTerminado->tiempo_compostaje_dias ?? null;
-
-        // Estadísticas de calidad
-        $orden->estadisticas_calidad = [
-            'total_inspecciones' => $orden->inspeccionesCalidad->count(),
-            'inspecciones_aprobadas' => $orden->inspeccionesCalidad->where('resultado', 'aprobado')->count(),
-            'tasa_aprobacion' => $orden->inspeccionesCalidad->count() > 0 ?
-                ($orden->inspeccionesCalidad->where('resultado', 'aprobado')->count() / $orden->inspeccionesCalidad->count()) * 100 : 0,
-        ];
+        // Calcular progreso
+        $progreso = 0;
+        if ($orden->cantidad_planificada > 0) {
+            $progreso = round(($orden->cantidad_producida / $orden->cantidad_planificada) * 100);
+        }
+        $orden->progreso = $progreso;
 
         return response()->json([
             'success' => true,

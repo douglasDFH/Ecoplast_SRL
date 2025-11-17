@@ -21,10 +21,10 @@
             <!-- Body -->
             <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
                 <!-- Código de Orden (solo para edición) -->
-                <div v-if="orden" class="rounded-2xl p-4" 
+                <div v-if="orden" class="rounded-2xl p-4"
                      style="background: linear-gradient(145deg, #d0e8f7, #b3d4f1); box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;">
-                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">Código de Orden</label>
-                    <p class="font-mono text-lg font-bold" style="color: #263238;">{{ orden.codigo_orden }}</p>
+                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">Número de Orden</label>
+                    <p class="font-mono text-lg font-bold" style="color: #263238;">{{ orden.numero_orden }}</p>
                 </div>
 
                 <!-- Producto -->
@@ -47,10 +47,10 @@
                     </select>
                 </div>
 
-                <!-- Cantidad Requerida -->
+                <!-- Cantidad Planificada -->
                 <div>
                     <label class="block text-sm font-medium mb-2" style="color: #455A64;">
-                        Cantidad Requerida <span class="text-red-500">*</span>
+                        Cantidad Planificada <span class="text-red-500">*</span>
                     </label>
                     <input
                            type="number"
@@ -58,11 +58,31 @@
                            required
                            min="1"
                            class="w-full px-4 py-3 rounded-2xl focus:outline-none"
-                           style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); 
-                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff; 
+                           style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
                                color: #263238;"
                            placeholder="Ej: 10000"
                     />
+                </div>
+
+                <!-- Formulación -->
+                <div>
+                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">
+                        Formulación <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                        v-model="formData.formulacion_id"
+                        required
+                        class="w-full px-4 py-3 rounded-2xl focus:outline-none"
+                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
+                               color: #263238;"
+                    >
+                        <option value="">Seleccionar formulación...</option>
+                        <option v-for="formulacion in formulaciones" :key="formulacion.id" :value="formulacion.id">
+                            {{ formulacion.nombre_formula }} ({{ formulacion.codigo_formula }})
+                        </option>
+                    </select>
                 </div>
 
                 <!-- Máquina -->
@@ -94,76 +114,112 @@
                         v-model="formData.prioridad"
                         required
                         class="w-full px-4 py-3 rounded-2xl focus:outline-none"
-                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); 
-                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff; 
+                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
                                color: #263238;"
                     >
                         <option value="baja">🟢 Baja</option>
-                        <option value="media">🟡 Media</option>
+                        <option value="normal">🟡 Normal</option>
                         <option value="alta">🟠 Alta</option>
                         <option value="urgente">🔴 Urgente</option>
                     </select>
                 </div>
 
-                <!-- Fechas -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2" style="color: #455A64;">
-                            Fecha Programada <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="date"
-                            v-model="formData.fecha_programada"
-                            required
-                            class="w-full px-4 py-3 rounded-2xl focus:outline-none"
-                            style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); 
-                                   box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff; 
-                                   color: #263238;"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2" style="color: #455A64;">
-                            Fecha Límite
-                        </label>
-                        <input
-                            type="date"
-                            v-model="formData.fecha_limite"
-                            class="w-full px-4 py-3 rounded-2xl focus:outline-none"
-                            style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); 
-                                   box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff; 
-                                   color: #263238;"
-                        />
-                    </div>
+                <!-- Fecha Programada -->
+                <div>
+                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">
+                        Fecha Programada <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="date"
+                        v-model="formData.fecha_programada"
+                        required
+                        class="w-full px-4 py-3 rounded-2xl focus:outline-none"
+                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
+                               color: #263238;"
+                    />
                 </div>
 
                 <!-- Turno -->
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">Turno</label>
+                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">
+                        Turno <span class="text-red-500">*</span>
+                    </label>
                     <select
                         v-model="formData.turno_id"
+                        required
                         class="w-full px-4 py-3 rounded-2xl focus:outline-none"
-                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); 
-                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff; 
+                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
                                color: #263238;"
                     >
-                        <option value="">Sin turno asignado</option>
+                        <option value="">Seleccionar turno...</option>
                         <option v-for="turno in turnos" :key="turno.id" :value="turno.id">
                             {{ turno.nombre_turno }} ({{ turno.hora_inicio }} - {{ turno.hora_fin }})
                         </option>
                     </select>
                 </div>
 
-                <!-- Observaciones -->
+                <!-- Operador y Supervisor (Opcional) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #455A64;">Operador</label>
+                        <select
+                            v-model="formData.operador_id"
+                            class="w-full px-4 py-3 rounded-2xl focus:outline-none"
+                            style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                                   box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
+                                   color: #263238;"
+                        >
+                            <option value="">Sin asignar</option>
+                            <option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">
+                                {{ usuario.nombre_completo }}
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #455A64;">Supervisor</label>
+                        <select
+                            v-model="formData.supervisor_id"
+                            class="w-full px-4 py-3 rounded-2xl focus:outline-none"
+                            style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                                   box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
+                                   color: #263238;"
+                        >
+                            <option value="">Sin asignar</option>
+                            <option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">
+                                {{ usuario.nombre_completo }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Notas de Producción -->
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">Observaciones</label>
+                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">Notas de Producción</label>
                     <textarea
-                        v-model="formData.observaciones"
+                        v-model="formData.notas_produccion"
                         rows="3"
                         class="w-full px-4 py-3 rounded-2xl focus:outline-none"
-                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); 
-                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff; 
+                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
                                color: #263238;"
-                        placeholder="Notas adicionales sobre la orden..."
+                        placeholder="Notas adicionales sobre la producción..."
+                    ></textarea>
+                </div>
+
+                <!-- Observaciones de Calidad -->
+                <div>
+                    <label class="block text-sm font-medium mb-2" style="color: #455A64;">Observaciones de Calidad</label>
+                    <textarea
+                        v-model="formData.observaciones_calidad"
+                        rows="2"
+                        class="w-full px-4 py-3 rounded-2xl focus:outline-none"
+                        style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+                               box-shadow: inset 8px 8px 16px #d0dfe8, inset -8px -8px 16px #ffffff;
+                               color: #263238;"
+                        placeholder="Observaciones sobre calidad esperada..."
                     ></textarea>
                 </div>
 
@@ -229,17 +285,22 @@ const errors = ref([]);
 const productos = ref([]);
 const maquinas = ref([]);
 const turnos = ref([]);
+const formulaciones = ref([]);
+const usuarios = ref([]);
 
 // Formulario
 const formData = reactive({
     producto_id: props.orden?.producto_id || '',
-    cantidad_requerida: props.orden?.cantidad_requerida || '',
+    cantidad_planificada: props.orden?.cantidad_planificada || '',
+    formulacion_id: props.orden?.formulacion_id || '',
     maquina_id: props.orden?.maquina_id || '',
-    prioridad: props.orden?.prioridad || 'media',
-    fecha_programada: props.orden?.fecha_programada || '',
-    fecha_limite: props.orden?.fecha_limite || '',
     turno_id: props.orden?.turno_id || '',
-    observaciones: props.orden?.observaciones || '',
+    prioridad: props.orden?.prioridad || 'normal',
+    fecha_programada: props.orden?.fecha_programada || '',
+    operador_id: props.orden?.operador_id || '',
+    supervisor_id: props.orden?.supervisor_id || '',
+    notas_produccion: props.orden?.notas_produccion || '',
+    observaciones_calidad: props.orden?.observaciones_calidad || '',
 });
 
 // Métodos
@@ -250,11 +311,17 @@ const handleSubmit = async () => {
     if (!formData.producto_id) {
         errors.value.push('Debe seleccionar un producto');
     }
-    if (!formData.cantidad_requerida || formData.cantidad_requerida < 1) {
+    if (!formData.cantidad_planificada || formData.cantidad_planificada < 1) {
         errors.value.push('La cantidad debe ser mayor a 0');
+    }
+    if (!formData.formulacion_id) {
+        errors.value.push('Debe seleccionar una formulación');
     }
     if (!formData.maquina_id) {
         errors.value.push('Debe seleccionar una máquina');
+    }
+    if (!formData.turno_id) {
+        errors.value.push('Debe seleccionar un turno');
     }
     if (!formData.fecha_programada) {
         errors.value.push('Debe especificar la fecha programada');
@@ -277,7 +344,8 @@ const handleSubmit = async () => {
 const loadProductos = async () => {
     try {
         const response = await api.get('/productos-terminados');
-        productos.value = response.data.data || response.data;
+        // Manejar respuesta paginada
+        productos.value = response.data.data?.data || response.data.data || response.data || [];
     } catch (error) {
         console.error('Error al cargar productos:', error);
     }
@@ -285,8 +353,9 @@ const loadProductos = async () => {
 
 const loadMaquinas = async () => {
     try {
-        const response = await api.get('/maquinas', { params: { activo: true } });
-        maquinas.value = response.data.data || response.data;
+        const response = await api.get('/maquinaria');
+        // Manejar respuesta paginada
+        maquinas.value = response.data.data?.data || response.data.data || response.data || [];
     } catch (error) {
         console.error('Error al cargar máquinas:', error);
     }
@@ -295,9 +364,31 @@ const loadMaquinas = async () => {
 const loadTurnos = async () => {
     try {
         const response = await api.get('/turnos');
-        turnos.value = response.data.data || response.data;
+        // Manejar respuesta paginada
+        turnos.value = response.data.data?.data || response.data.data || response.data || [];
     } catch (error) {
         console.error('Error al cargar turnos:', error);
+    }
+};
+
+const loadFormulaciones = async () => {
+    try {
+        const response = await api.get('/formulaciones');
+        // Manejar respuesta paginada
+        formulaciones.value = response.data.data?.data || response.data.data || response.data || [];
+    } catch (error) {
+        console.error('Error al cargar formulaciones:', error);
+    }
+};
+
+const loadUsuarios = async () => {
+    try {
+        const response = await api.get('/usuarios');
+        usuarios.value = response.data.data || response.data;
+    } catch (error) {
+        console.error('Error al cargar usuarios:', error);
+        // Si no existe el endpoint de usuarios, usar un array vacío
+        usuarios.value = [];
     }
 };
 
@@ -306,7 +397,9 @@ onMounted(async () => {
     await Promise.all([
         loadProductos(),
         loadMaquinas(),
-        loadTurnos()
+        loadTurnos(),
+        loadFormulaciones(),
+        loadUsuarios()
     ]);
 });
 </script>

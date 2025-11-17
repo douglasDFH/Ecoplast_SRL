@@ -37,7 +37,7 @@
             >
                 <option value="">Seleccionar orden...</option>
                 <option v-for="orden in ordenesActivas" :key="orden.id" :value="orden.id">
-                    {{ orden.codigo_orden }} - {{ orden.producto?.nombre }} ({{ orden.cantidad_producida }}/{{ orden.cantidad_requerida }})
+                    {{ orden.numero_orden }} - {{ orden.producto_terminado?.nombre_producto }} ({{ orden.cantidad_producida || 0 }}/{{ orden.cantidad_planificada }})
                 </option>
             </select>
         </div>
@@ -46,16 +46,16 @@
         <div v-if="ordenActual" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div class="p-6 rounded-3xl" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); box-shadow: 12px 12px 24px #b3d4f1, -12px -12px 24px #f3ffff;">
                 <div class="text-xl font-bold mb-2" style="color: #607D8B;">Producto</div>
-                <div class="text-3xl font-black" style="color: #263238;">{{ ordenActual.producto?.nombre }}</div>
-                <div class="text-lg font-semibold mt-2" style="color: #607D8B;">{{ ordenActual.producto?.codigo }}</div>
+                <div class="text-3xl font-black" style="color: #263238;">{{ ordenActual.producto_terminado?.nombre_producto }}</div>
+                <div class="text-lg font-semibold mt-2" style="color: #607D8B;">{{ ordenActual.producto_terminado?.codigo_producto }}</div>
             </div>
-            
+
             <div class="p-6 rounded-3xl" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); box-shadow: 12px 12px 24px #b3d4f1, -12px -12px 24px #f3ffff;">
                 <div class="text-xl font-bold mb-2" style="color: #607D8B;">Meta de Producción</div>
-                <div class="text-5xl font-black" style="color: #263238;">{{ ordenActual.cantidad_requerida }}</div>
+                <div class="text-5xl font-black" style="color: #263238;">{{ ordenActual.cantidad_planificada }}</div>
                 <div class="text-lg font-semibold mt-2" style="color: #607D8B;">unidades</div>
             </div>
-            
+
             <div class="p-6 rounded-3xl" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); box-shadow: 12px 12px 24px #b3d4f1, -12px -12px 24px #f3ffff;">
                 <div class="text-xl font-bold mb-2" style="color: #607D8B;">Progreso</div>
                 <div class="text-5xl font-black" style="color: #2E7D32;">{{ ordenActual.cantidad_producida || 0 }}</div>
@@ -189,8 +189,8 @@
                     <div class="flex items-center space-x-6">
                         <div class="text-3xl font-black" style="color: #455A64;">{{ reg.hora }}:00</div>
                         <div>
-                            <div class="text-xl font-bold" style="color: #263238;">{{ reg.orden?.codigo_orden }}</div>
-                            <div class="text-lg font-semibold" style="color: #607D8B;">{{ reg.orden?.producto?.nombre }}</div>
+                            <div class="text-xl font-bold" style="color: #263238;">{{ reg.orden?.numero_orden }}</div>
+                            <div class="text-lg font-semibold" style="color: #607D8B;">{{ reg.orden?.producto_terminado?.nombre_producto }}</div>
                         </div>
                     </div>
                     <div class="flex items-center space-x-8">
@@ -232,7 +232,7 @@ let intervalHora = null;
 // Computed
 const progreso = computed(() => {
     if (!ordenActual.value) return 0;
-    const total = ordenActual.value.cantidad_requerida;
+    const total = ordenActual.value.cantidad_planificada;
     const actual = ordenActual.value.cantidad_producida || 0;
     return total > 0 ? Math.round((actual / total) * 100) : 0;
 });
@@ -251,28 +251,43 @@ const cargarOrdenesActivas = async () => {
     try {
         const { data } = await axios.get('/api/ordenes-produccion', {
             params: {
-                estado: 'en_proceso',
-                incluir: 'producto,maquina'
+                estado: 'en_proceso'
             }
         });
-        ordenesActivas.value = data.data || [];
+        // Manejar respuesta paginada o directa
+        if (data.success && data.data) {
+            ordenesActivas.value = data.data.data || data.data || [];
+        } else {
+            ordenesActivas.value = data.data?.data || data.data || data || [];
+        }
     } catch (error) {
         console.error('Error cargando órdenes activas:', error);
+        ordenesActivas.value = [];
     }
 };
 
 const cargarOrden = async () => {
+    console.log('cargarOrden llamado, ordenSeleccionada:', ordenSeleccionada.value);
+
     if (!ordenSeleccionada.value) {
         ordenActual.value = null;
         return;
     }
-    
+
     try {
-        const { data } = await axios.get(`/api/ordenes-produccion/${ordenSeleccionada.value}`, {
-            params: { incluir: 'producto,maquina' }
-        });
-        ordenActual.value = data;
-        
+        console.log('Haciendo petición a:', `/api/ordenes-produccion/${ordenSeleccionada.value}`);
+        const response = await axios.get(`/api/ordenes-produccion/${ordenSeleccionada.value}`);
+        console.log('Respuesta recibida:', response.data);
+
+        // El OrdenProduccionController devuelve { success: true, data: {...} }
+        if (response.data.success && response.data.data) {
+            ordenActual.value = response.data.data;
+            console.log('ordenActual asignado:', ordenActual.value);
+        } else {
+            ordenActual.value = response.data.data || response.data;
+            console.log('ordenActual asignado (fallback):', ordenActual.value);
+        }
+
         // Reset formulario
         registro.value = {
             cantidad_producida: 0,
@@ -281,6 +296,9 @@ const cargarOrden = async () => {
         };
     } catch (error) {
         console.error('Error cargando orden:', error);
+        console.error('Error detalles:', error.response?.data);
+        alert('Error al cargar la orden: ' + (error.response?.data?.message || error.message));
+        ordenActual.value = null;
     }
 };
 
@@ -289,11 +307,11 @@ const cargarRegistrosHoy = async () => {
         const hoy = new Date().toISOString().split('T')[0];
         const { data } = await axios.get('/api/registros-produccion', {
             params: {
-                fecha: hoy,
-                incluir: 'orden.producto'
+                fecha: hoy
             }
         });
-        registrosHoy.value = data.data || [];
+        // Manejar respuesta paginada o directa
+        registrosHoy.value = data.data?.data || data.data || data || [];
     } catch (error) {
         console.error('Error cargando registros:', error);
     }
@@ -317,28 +335,36 @@ const decrementar = (tipo) => {
 
 const guardarRegistro = async () => {
     if (!puedeGuardar.value) return;
-    
+
     try {
+        const ahora = new Date();
+        const piezas_conformes = registro.value.cantidad_producida - registro.value.cantidad_defectuosa;
+
         const payload = {
-            orden_produccion_id: ordenActual.value.id,
-            fecha_registro: new Date().toISOString().split('T')[0],
-            hora_registro: new Date().getHours(),
-            cantidad_producida: registro.value.cantidad_producida,
-            cantidad_defectuosa: registro.value.cantidad_defectuosa,
-            observaciones: registro.value.observaciones || null
+            orden_id: ordenActual.value.id,
+            maquina_id: ordenActual.value.maquina_id || 1,
+            operador_id: ordenActual.value.operador_id || 1,
+            fecha_hora: ahora.toISOString(),
+            piezas_producidas: registro.value.cantidad_producida,
+            piezas_conformes: piezas_conformes >= 0 ? piezas_conformes : 0,
+            piezas_defectuosas: registro.value.cantidad_defectuosa,
+            observaciones: registro.value.observaciones || null,
+            alerta_calidad: false
         };
-        
-        await axios.post('/api/registros-produccion', payload);
-        
+
+        console.log('Enviando registro:', payload);
+        const response = await axios.post('/api/registros-produccion', payload);
+        console.log('Registro guardado:', response.data);
+
         alert('✓ Registro guardado exitosamente');
-        
+
         // Reset formulario
         registro.value = {
             cantidad_producida: 0,
             cantidad_defectuosa: 0,
             observaciones: ''
         };
-        
+
         // Recargar datos
         await Promise.all([
             cargarOrden(),
@@ -346,7 +372,12 @@ const guardarRegistro = async () => {
         ]);
     } catch (error) {
         console.error('Error guardando registro:', error);
-        alert('Error al guardar el registro. Por favor intenta nuevamente.');
+        if (error.response?.data?.errors) {
+            const errores = Object.values(error.response.data.errors).flat().join('\n');
+            alert('Errores de validación:\n' + errores);
+        } else {
+            alert('Error al guardar el registro: ' + (error.response?.data?.message || error.message));
+        }
     }
 };
 

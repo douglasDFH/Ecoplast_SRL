@@ -13,10 +13,55 @@ Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('l
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// Dashboard (protegido por autenticación)
+// Dashboard y rutas SPA (protegido por autenticación)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Rutas para la SPA de Vue
+    Route::get('/ordenes', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/produccion', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/calidad', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/inventario', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/mantenimiento', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/productos', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/maquinas', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/formulaciones', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/usuarios', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/insumos', function () {
+        return view('dashboard');
+    });
+
+    Route::get('/categorias-insumos', function () {
+        return view('dashboard');
+    });
 });
 

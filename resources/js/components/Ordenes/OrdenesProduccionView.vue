@@ -184,14 +184,14 @@
                         style="background: linear-gradient(145deg, #f5f9fc, #e3f2fd);"
                     >
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="font-mono text-sm font-bold" style="color: #263238;">{{ orden.codigo_orden }}</span>
+                            <span class="font-mono text-sm font-bold" style="color: #263238;">{{ orden.numero_orden }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm font-bold" style="color: #263238;">{{ orden.producto?.nombre || 'N/A' }}</div>
-                            <div class="text-xs font-medium" style="color: #607D8B;">{{ orden.producto?.codigo || '' }}</div>
+                            <div class="text-sm font-bold" style="color: #263238;">{{ orden.productoTerminado?.nombre_producto || 'N/A' }}</div>
+                            <div class="text-xs font-medium" style="color: #607D8B;">{{ orden.productoTerminado?.codigo_producto || '' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-semibold" style="color: #263238;">{{ orden.cantidad_producida || 0 }} / {{ orden.cantidad_requerida }}</div>
+                            <div class="text-sm font-semibold" style="color: #263238;">{{ orden.cantidad_producida || 0 }} / {{ orden.cantidad_planificada }}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center space-x-2">
@@ -334,7 +334,7 @@ const handleGuardar = async (data) => {
 };
 
 const handleIniciar = async (orden) => {
-    if (confirm(`¿Iniciar producción de la orden ${orden.codigo_orden}?`)) {
+    if (confirm(`¿Iniciar producción de la orden ${orden.numero_orden}?`)) {
         try {
             await iniciarOrden(orden.id);
         } catch (error) {
@@ -344,10 +344,10 @@ const handleIniciar = async (orden) => {
 };
 
 const handleFinalizar = async (orden) => {
-    if (confirm(`¿Finalizar producción de la orden ${orden.codigo_orden}?`)) {
+    if (confirm(`¿Finalizar producción de la orden ${orden.numero_orden}?`)) {
         try {
             await finalizarOrden(orden.id, {
-                cantidad_producida: orden.cantidad_producida || orden.cantidad_requerida
+                cantidad_producida: orden.cantidad_producida || orden.cantidad_planificada
             });
         } catch (error) {
             alert('Error al finalizar orden');
@@ -356,7 +356,7 @@ const handleFinalizar = async (orden) => {
 };
 
 const handleCancelar = async (orden) => {
-    const motivo = prompt(`¿Motivo de cancelación de la orden ${orden.codigo_orden}?`);
+    const motivo = prompt(`¿Motivo de cancelación de la orden ${orden.numero_orden}?`);
     if (motivo) {
         try {
             await cancelarOrden(orden.id, motivo);

@@ -17,12 +17,50 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\TurnoController;
 use App\Http\Controllers\Api\FormulacionController;
 use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\CategoriaInsumoController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
+    // Usuarios (simple endpoint para obtener listado)
+    Route::get('/usuarios', function () {
+        return response()->json([
+            'success' => true,
+            'data' => \Illuminate\Support\Facades\DB::table('usuarios')
+                ->leftJoin('roles', 'usuarios.rol_id', '=', 'roles.id')
+                ->select(
+                    'usuarios.*',
+                    'roles.nombre_rol',
+                    'roles.descripcion as rol_descripcion',
+                    'roles.nivel_acceso'
+                )
+                ->get()
+                ->map(function ($usuario) {
+                    $usuario->rol = $usuario->nombre_rol ? [
+                        'id' => $usuario->rol_id,
+                        'nombre_rol' => $usuario->nombre_rol,
+                        'descripcion' => $usuario->rol_descripcion,
+                        'nivel_acceso' => $usuario->nivel_acceso
+                    ] : null;
+                    unset($usuario->nombre_rol, $usuario->rol_descripcion, $usuario->nivel_acceso);
+                    return $usuario;
+                })
+        ]);
+    });
+
+    // Roles (simple endpoint para obtener listado)
+    Route::get('/roles', function () {
+        return response()->json([
+            'success' => true,
+            'data' => \Illuminate\Support\Facades\DB::table('roles')
+                ->select('id', 'nombre_rol', 'descripcion', 'nivel_acceso')
+                ->orderBy('nivel_acceso', 'desc')
+                ->get()
+        ]);
+    });
 
     // Dashboard Principal
     Route::get('dashboard', [DashboardController::class, 'index']);
@@ -38,6 +76,9 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('kpis/inventario', [KpiController::class, 'inventario']);
     Route::get('kpis/mantenimiento', [KpiController::class, 'mantenimiento']);
     Route::get('kpis/oee', [KpiController::class, 'oee']);
+
+    // Rutas para Categorías de Insumos
+    Route::apiResource('categorias-insumos', CategoriaInsumoController::class);
 
     // Rutas para Insumos biodegradables
     Route::apiResource('insumos', InsumoController::class);

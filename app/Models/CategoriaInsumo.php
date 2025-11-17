@@ -23,8 +23,18 @@ class CategoriaInsumo extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'nombre',
+        'nombre_categoria',
         'descripcion',
+        'es_biodegradable',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'es_biodegradable' => 'boolean',
     ];
 
     /**

@@ -19,8 +19,9 @@ class OrdenProduccionObserver
         broadcast(new OrdenProduccionActualizada($ordenProduccion, 'creada'))->toOthers();
 
         // Programar una verificación de retraso si la orden no empieza a tiempo
-        $delay = $ordenProduccion->fecha_inicio_planificada->addHours(1);
-        VerificarRetrasoOrdenProduccion::dispatch($ordenProduccion)->delay($delay);
+        // TODO: Descomentar cuando fecha_inicio_planificada esté disponible
+        // $delay = $ordenProduccion->fecha_inicio_planificada->addHours(1);
+        // VerificarRetrasoOrdenProduccion::dispatch($ordenProduccion)->delay($delay);
     }
 
     /**

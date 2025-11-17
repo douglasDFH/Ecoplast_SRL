@@ -2,7 +2,7 @@
     <div class="min-h-screen" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
         <div class="flex h-screen overflow-hidden">
             <!-- Sidebar -->
-            <aside class="w-64 flex-shrink-0 p-4">
+            <aside class="w-64 flex-shrink-0 p-4 overflow-y-auto h-screen scrollbar-custom">
                 <!-- Logo -->
                 <div class="p-6 mb-6 rounded-3xl" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); box-shadow: 20px 20px 60px #b3d4f1, -20px -20px 60px #f3ffff;">
                     <div class="flex items-center justify-center">
@@ -85,6 +85,80 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                         <span>Mantenimiento</span>
+                    </router-link>
+
+                    <div class="mt-6 mb-3">
+                        <p class="px-5 text-xs font-semibold uppercase tracking-wider" style="color: #607D8B;">Catálogos</p>
+                    </div>
+
+                    <router-link
+                        to="/productos"
+                        class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
+                        :class="$route.path === '/productos' ? 'nav-link-active' : 'nav-link'"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Productos</span>
+                    </router-link>
+
+                    <router-link
+                        to="/maquinas"
+                        class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
+                        :class="$route.path === '/maquinas' ? 'nav-link-active' : 'nav-link'"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                        <span>Máquinas</span>
+                    </router-link>
+
+                    <router-link
+                        to="/formulaciones"
+                        class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
+                        :class="$route.path === '/formulaciones' ? 'nav-link-active' : 'nav-link'"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                        <span>Formulaciones</span>
+                    </router-link>
+
+                    <router-link
+                        to="/usuarios"
+                        class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
+                        :class="$route.path === '/usuarios' ? 'nav-link-active' : 'nav-link'"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <span>Usuarios</span>
+                    </router-link>
+
+                    <div class="mt-6 mb-3">
+                        <p class="px-5 text-xs font-semibold uppercase tracking-wider" style="color: #607D8B;">Inventario</p>
+                    </div>
+
+                    <router-link
+                        to="/insumos"
+                        class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
+                        :class="$route.path === '/insumos' ? 'nav-link-active' : 'nav-link'"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Insumos</span>
+                    </router-link>
+
+                    <router-link
+                        to="/categorias-insumos"
+                        class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
+                        :class="$route.path === '/categorias-insumos' ? 'nav-link-active' : 'nav-link'"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        <span>Categorías de Insumos</span>
                     </router-link>
                 </nav>
             </aside>
@@ -179,6 +253,12 @@ const pageTitle = computed(() => {
         '/inventario': 'Gestión de Inventario',
         '/calidad': 'Control de Calidad',
         '/mantenimiento': 'Mantenimiento',
+        '/productos': 'Productos Terminados',
+        '/maquinas': 'Maquinaria',
+        '/formulaciones': 'Formulaciones',
+        '/usuarios': 'Usuarios y Roles',
+        '/insumos': 'Gestión de Insumos',
+        '/categorias-insumos': 'Categorías de Insumos',
     };
     return titles[route.path] || 'Ecoplast SRL';
 });
@@ -191,6 +271,12 @@ const pageSubtitle = computed(() => {
         '/inventario': 'Control de stock de insumos y productos',
         '/calidad': 'Inspecciones y control de calidad',
         '/mantenimiento': 'Gestión de mantenimiento de maquinaria',
+        '/productos': 'Catálogo de productos biodegradables',
+        '/maquinas': 'Control y mantenimiento de maquinaria',
+        '/formulaciones': 'Fórmulas de producción biodegradable',
+        '/usuarios': 'Gestión de usuarios y permisos',
+        '/insumos': 'Control de insumos biodegradables y materias primas',
+        '/categorias-insumos': 'Clasificación de insumos por categoría',
     };
     return subtitles[route.path] || 'Bienvenido al sistema de gestión';
 });
@@ -223,5 +309,32 @@ const pageSubtitle = computed(() => {
 
 .logout-btn:hover {
     box-shadow: 6px 6px 12px #b3d4f1, -6px -6px 12px #f3ffff;
+}
+
+/* Scrollbar personalizado */
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+    background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(145deg, #1565C0, #1976D2);
+    border-radius: 10px;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(145deg, #1976D2, #2196F3);
+}
+
+/* Para Firefox */
+.scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: #1565C0 #e3f2fd;
 }
 </style>

@@ -23,30 +23,29 @@ class FormulacionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Formulacion::with(['producto', 'insumos.insumo']);
+        $query = Formulacion::with(['componentes.insumo']);
 
         // Filtros
-        if ($request->has('producto_id')) {
-            $query->where('producto_id', $request->producto_id);
-        }
-
-        if ($request->has('activa')) {
-            $query->where('activa', $request->boolean('activa'));
+        if ($request->has('activo')) {
+            $query->where('activo', $request->boolean('activo'));
         }
 
         // Búsqueda por código o nombre
         if ($request->has('buscar')) {
             $buscar = $request->buscar;
             $query->where(function($q) use ($buscar) {
-                $q->where('codigo_formulacion', 'like', "%{$buscar}%")
-                  ->orWhere('nombre_formulacion', 'like', "%{$buscar}%");
+                $q->where('codigo_formula', 'like', "%{$buscar}%")
+                  ->orWhere('nombre_formula', 'like', "%{$buscar}%");
             });
         }
 
-        $formulaciones = $query->orderBy('created_at', 'desc')
+        $formulaciones = $query->orderBy('id', 'desc')
             ->paginate($request->get('per_page', 15));
 
-        return response()->json($formulaciones);
+        return response()->json([
+            'success' => true,
+            'data' => $formulaciones
+        ]);
     }
 
     /**
@@ -55,12 +54,14 @@ class FormulacionController extends Controller
     public function show(int $id): JsonResponse
     {
         $formulacion = Formulacion::with([
-            'producto.categoria',
-            'insumos.insumo.categoria',
+            'componentes.insumo',
             'ordenesProduccion'
         ])->findOrFail($id);
 
-        return response()->json($formulacion);
+        return response()->json([
+            'success' => true,
+            'data' => $formulacion
+        ]);
     }
 
     /**
@@ -69,24 +70,24 @@ class FormulacionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'codigo_formulacion' => 'required|string|max:50|unique:formulaciones,codigo_formulacion',
-            'nombre_formulacion' => 'required|string|max:150',
-            'producto_id' => 'required|exists:productos,id',
+            'codigo_formula' => 'required|string|max:50|unique:formulaciones,codigo_formula',
+            'nombre_formula' => 'required|string|max:150',
             'version' => 'nullable|string|max:20',
-            'descripcion' => 'nullable|string|max:500',
-            'temperatura_procesamiento' => 'nullable|numeric',
-            'presion_procesamiento' => 'nullable|numeric',
-            'tiempo_ciclo_segundos' => 'nullable|integer|min:1',
-            'rendimiento_kg_hora' => 'nullable|numeric|min:0',
-            'notas_produccion' => 'nullable|string|max:1000',
-            'activa' => 'nullable|boolean',
-            
-            // Insumos de la formulación
-            'insumos' => 'required|array|min:1',
-            'insumos.*.insumo_id' => 'required|exists:insumos,id',
-            'insumos.*.porcentaje' => 'required|numeric|min:0|max:100',
-            'insumos.*.cantidad_kg_por_lote' => 'required|numeric|min:0',
-            'insumos.*.notas' => 'nullable|string|max:200',
+            'descripcion' => 'nullable|string',
+            'tipo_producto_destino' => 'nullable|string|max:100',
+            'temperatura_procesamiento_min' => 'nullable|numeric',
+            'temperatura_procesamiento_max' => 'nullable|numeric',
+            'tiempo_degradacion_estimado' => 'nullable|integer',
+            'certificaciones' => 'nullable|string',
+            'activo' => 'nullable|boolean',
+
+            // Componentes de la formulación
+            'componentes' => 'nullable|array',
+            'componentes.*.insumo_id' => 'required|exists:insumos,id',
+            'componentes.*.porcentaje' => 'required|numeric|min:0|max:100',
+            'componentes.*.cantidad_base' => 'required|numeric|min:0',
+            'componentes.*.orden_adicion' => 'nullable|integer',
+            'componentes.*.notas' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -96,53 +97,48 @@ class FormulacionController extends Controller
             ], 422);
         }
 
-        // Validar que los porcentajes sumen 100%
-        $sumaPorcentajes = collect($request->insumos)->sum('porcentaje');
-        if (abs($sumaPorcentajes - 100) > 0.1) {
-            return response()->json([
-                'message' => 'Los porcentajes de los insumos deben sumar 100%',
-                'suma_actual' => $sumaPorcentajes
-            ], 422);
-        }
-
         DB::beginTransaction();
         try {
             // Crear formulación
             $formulacion = Formulacion::create([
-                'codigo_formulacion' => $request->codigo_formulacion,
-                'nombre_formulacion' => $request->nombre_formulacion,
-                'producto_id' => $request->producto_id,
-                'version' => $request->version,
+                'codigo_formula' => $request->codigo_formula,
+                'nombre_formula' => $request->nombre_formula,
+                'version' => $request->version ?? '1.0',
                 'descripcion' => $request->descripcion,
-                'temperatura_procesamiento' => $request->temperatura_procesamiento,
-                'presion_procesamiento' => $request->presion_procesamiento,
-                'tiempo_ciclo_segundos' => $request->tiempo_ciclo_segundos,
-                'rendimiento_kg_hora' => $request->rendimiento_kg_hora,
-                'notas_produccion' => $request->notas_produccion,
-                'activa' => $request->get('activa', true),
+                'tipo_producto_destino' => $request->tipo_producto_destino,
+                'temperatura_procesamiento_min' => $request->temperatura_procesamiento_min,
+                'temperatura_procesamiento_max' => $request->temperatura_procesamiento_max,
+                'tiempo_degradacion_estimado' => $request->tiempo_degradacion_estimado,
+                'certificaciones' => $request->certificaciones,
+                'activo' => $request->get('activo', true),
             ]);
 
-            // Crear insumos de la formulación
-            foreach ($request->insumos as $insumoData) {
-                FormulacionInsumo::create([
-                    'formulacion_id' => $formulacion->id,
-                    'insumo_id' => $insumoData['insumo_id'],
-                    'porcentaje' => $insumoData['porcentaje'],
-                    'cantidad_kg_por_lote' => $insumoData['cantidad_kg_por_lote'],
-                    'notas' => $insumoData['notas'] ?? null,
-                ]);
+            // Crear componentes de la formulación
+            if ($request->has('componentes')) {
+                foreach ($request->componentes as $componenteData) {
+                    FormulacionInsumo::create([
+                        'formulacion_id' => $formulacion->id,
+                        'insumo_id' => $componenteData['insumo_id'],
+                        'porcentaje' => $componenteData['porcentaje'],
+                        'cantidad_base' => $componenteData['cantidad_base'],
+                        'orden_adicion' => $componenteData['orden_adicion'] ?? 1,
+                        'notas' => $componenteData['notas'] ?? null,
+                    ]);
+                }
             }
 
             DB::commit();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Formulación creada exitosamente',
-                'data' => $formulacion->load('insumos.insumo')
+                'data' => $formulacion->load('componentes.insumo')
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
+                'success' => false,
                 'message' => 'Error al crear formulación',
                 'error' => $e->getMessage()
             ], 500);

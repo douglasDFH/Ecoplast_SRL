@@ -25,41 +25,36 @@ class RegistroProduccionController extends Controller
     {
         $query = RegistroProduccion::with([
             'ordenProduccion.productoTerminado',
-            'ordenProduccion.maquina',
-            'loteProduccion',
-            'turno',
+            'maquina',
             'operador'
         ]);
 
         // Filtros
-        if ($request->has('orden_produccion_id')) {
-            $query->where('orden_produccion_id', $request->orden_produccion_id);
+        if ($request->has('orden_id')) {
+            $query->where('orden_id', $request->orden_id);
         }
 
-        if ($request->has('lote_id')) {
-            $query->where('lote_id', $request->lote_id);
+        if ($request->has('maquina_id')) {
+            $query->where('maquina_id', $request->maquina_id);
         }
 
-        if ($request->has('turno_id')) {
-            $query->where('turno_id', $request->turno_id);
+        if ($request->has('operador_id')) {
+            $query->where('operador_id', $request->operador_id);
+        }
+
+        if ($request->has('fecha')) {
+            $fecha = $request->fecha;
+            $query->whereDate('fecha_hora', $fecha);
         }
 
         if ($request->has('fecha_inicio') && $request->has('fecha_fin')) {
-            $query->whereBetween('fecha_hora_inicio', [
+            $query->whereBetween('fecha_hora', [
                 $request->fecha_inicio,
                 $request->fecha_fin
             ]);
         }
 
-        // Búsqueda por código de lote
-        if ($request->has('buscar')) {
-            $buscar = $request->buscar;
-            $query->whereHas('loteProduccion', function($q) use ($buscar) {
-                $q->where('codigo_lote', 'like', "%{$buscar}%");
-            });
-        }
-
-        $registros = $query->orderBy('fecha_hora_inicio', 'desc')
+        $registros = $query->orderBy('fecha_hora', 'desc')
             ->paginate($request->get('per_page', 15));
 
         return response()->json($registros);
@@ -72,11 +67,8 @@ class RegistroProduccionController extends Controller
     {
         $registro = RegistroProduccion::with([
             'ordenProduccion.productoTerminado',
-            'ordenProduccion.maquina',
-            'loteProduccion',
-            'turno',
-            'operador',
-            'supervisor'
+            'maquina',
+            'operador'
         ])->findOrFail($id);
 
         return response()->json($registro);
@@ -88,23 +80,26 @@ class RegistroProduccionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'orden_produccion_id' => 'required|exists:ordenes_produccion,id',
-            'lote_id' => 'nullable|exists:lotes_produccion,id',
-            'turno_id' => 'required|exists:turnos,id',
-            'operador_id' => 'required|exists:users,id',
-            'supervisor_id' => 'nullable|exists:users,id',
-            'fecha_hora_inicio' => 'required|date',
-            'fecha_hora_fin' => 'nullable|date|after:fecha_hora_inicio',
-            'cantidad_producida' => 'required|integer|min:0',
-            'cantidad_conforme' => 'required|integer|min:0',
-            'cantidad_defectuosa' => 'required|integer|min:0',
-            'merma_kg' => 'nullable|numeric|min:0',
-            'tiempo_paro_minutos' => 'nullable|integer|min:0',
-            'temperatura_promedio' => 'nullable|numeric',
-            'presion_promedio' => 'nullable|numeric',
-            'velocidad_promedio' => 'nullable|numeric',
-            'observaciones' => 'nullable|string|max:500',
-            'incidencias' => 'nullable|string|max:500',
+            'orden_id' => 'required|exists:ordenes_produccion,id',
+            'maquina_id' => 'required|exists:maquinas,id',
+            'operador_id' => 'required|exists:usuarios,id',
+            'fecha_hora' => 'required|date',
+            'piezas_producidas' => 'required|integer|min:0',
+            'piezas_conformes' => 'required|integer|min:0',
+            'piezas_defectuosas' => 'required|integer|min:0',
+            'tipo_defecto' => 'nullable|string|max:100',
+            'temperatura_zona1' => 'nullable|numeric',
+            'temperatura_zona2' => 'nullable|numeric',
+            'temperatura_zona3' => 'nullable|numeric',
+            'temperatura_zona4' => 'nullable|numeric',
+            'presion_inyeccion' => 'nullable|numeric',
+            'velocidad_husillo' => 'nullable|numeric',
+            'tiempo_ciclo_real' => 'nullable|numeric',
+            'consumo_energia_kwh' => 'nullable|numeric',
+            'consumo_material_kg' => 'nullable|numeric',
+            'scrap_kg' => 'nullable|numeric',
+            'observaciones' => 'nullable|string',
+            'alerta_calidad' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -119,17 +114,17 @@ class RegistroProduccionController extends Controller
             $registro = RegistroProduccion::create($request->all());
 
             // Actualizar totales en la orden de producción
-            $orden = OrdenProduccion::findOrFail($request->orden_produccion_id);
-            $orden->cantidad_producida += $request->cantidad_producida;
-            $orden->cantidad_conforme += $request->cantidad_conforme;
-            $orden->cantidad_defectuosa += $request->cantidad_defectuosa;
-            
+            $orden = OrdenProduccion::findOrFail($request->orden_id);
+            $orden->cantidad_producida += $request->piezas_producidas;
+            $orden->cantidad_conforme += $request->piezas_conformes;
+            $orden->cantidad_defectuosa += $request->piezas_defectuosas;
+
             // Si se alcanzó la cantidad planificada, cambiar estado
             if ($orden->cantidad_producida >= $orden->cantidad_planificada) {
                 $orden->estado = 'completada';
                 $orden->fecha_fin = now();
             }
-            
+
             $orden->save();
 
             DB::commit();
@@ -138,8 +133,7 @@ class RegistroProduccionController extends Controller
                 'message' => 'Registro de producción creado exitosamente',
                 'data' => $registro->load([
                     'ordenProduccion',
-                    'loteProduccion',
-                    'turno',
+                    'maquina',
                     'operador'
                 ])
             ], 201);

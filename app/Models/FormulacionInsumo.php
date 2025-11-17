@@ -21,7 +21,7 @@ class FormulacionInsumo extends Model
      *
      * @var string
      */
-    protected $table = 'formulacion_insumos';
+    protected $table = 'componentes_formulacion';
 
     /**
      * The attributes that are mass assignable.
@@ -32,7 +32,8 @@ class FormulacionInsumo extends Model
         'formulacion_id',
         'insumo_id',
         'porcentaje',
-        'cantidad_kg_por_lote',
+        'cantidad_base',
+        'orden_adicion',
         'notas',
     ];
 
@@ -43,7 +44,7 @@ class FormulacionInsumo extends Model
      */
     protected $casts = [
         'porcentaje' => 'decimal:2',
-        'cantidad_kg_por_lote' => 'decimal:3',
+        'cantidad_base' => 'decimal:3',
     ];
 
     /**

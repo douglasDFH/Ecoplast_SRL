@@ -24,10 +24,18 @@ class Formulacion extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'nombre',
+        'codigo_formula',
+        'nombre_formula',
         'descripcion',
-        'producto_terminado_id',
-        'creado_por',
+        'version',
+        'tipo_producto_destino',
+        'temperatura_procesamiento_min',
+        'temperatura_procesamiento_max',
+        'tiempo_degradacion_estimado',
+        'certificaciones',
+        'aprobado',
+        'fecha_aprobacion',
+        'usuario_aprueba_id',
         'activo',
     ];
 
@@ -38,32 +46,42 @@ class Formulacion extends Model
      */
     protected $casts = [
         'activo' => 'boolean',
+        'aprobado' => 'boolean',
+        'fecha_aprobacion' => 'datetime',
+        'temperatura_procesamiento_min' => 'decimal:1',
+        'temperatura_procesamiento_max' => 'decimal:1',
     ];
 
     /**
-     * Relación: Una formulación pertenece a un producto terminado.
+     * Relación: Una formulación tiene muchos componentes (insumos).
      */
-    public function productoTerminado(): BelongsTo
+    public function componentes()
     {
-        return $this->belongsTo(ProductoTerminado::class, 'producto_terminado_id');
+        return $this->hasMany(FormulacionInsumo::class, 'formulacion_id');
     }
 
     /**
-     * Relación: Una formulación es creada por un usuario.
+     * Alias para componentes
      */
-    public function creador(): BelongsTo
+    public function insumos()
     {
-        return $this->belongsTo(User::class, 'creado_por');
+        return $this->componentes();
     }
 
     /**
-     * Relación: Una formulación tiene muchos insumos.
+     * Relación: Órdenes de producción que usan esta formulación
      */
-    public function insumos(): BelongsToMany
+    public function ordenesProduccion()
     {
-        return $this->belongsToMany(Insumo::class, 'formulacion_insumo', 'formulacion_id', 'insumo_id')
-                    ->withPivot('cantidad_necesaria')
-                    ->withTimestamps();
+        return $this->hasMany(OrdenProduccion::class, 'formulacion_id');
+    }
+
+    /**
+     * Relación: Usuario que aprobó la formulación
+     */
+    public function usuarioAprueba(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'usuario_aprueba_id');
     }
 
     /**
@@ -72,5 +90,13 @@ class Formulacion extends Model
     public function scopeActivas($query)
     {
         return $query->where('activo', true);
+    }
+
+    /**
+     * Scope: Solo formulaciones aprobadas.
+     */
+    public function scopeAprobadas($query)
+    {
+        return $query->where('aprobado', true);
     }
 }

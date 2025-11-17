@@ -2,83 +2,83 @@ import { ref, computed } from 'vue';
 import ordenProduccionService from '../services/ordenProduccionService';
 
 export function useOrdenes() {
-    const loading = ref(false);
     const ordenes = ref([]);
-    const ordenActual = ref(null);
-    const estadisticas = ref(null);
-    const error = ref(null);
-
-    // Filtros
+    const loading = ref(false);
     const filtros = ref({
         estado: '',
         prioridad: '',
-        producto_id: null,
-        maquina_id: null,
+        producto_id: '',
+        maquina_id: '',
         fecha_desde: '',
-        fecha_hasta: '',
+        fecha_hasta: ''
     });
 
-    // Cargar órdenes con filtros
+    // Computed properties
+    const ordenesPendientes = computed(() => 
+        ordenes.value.filter(o => o.estado === 'pendiente')
+    );
+
+    const ordenesEnProceso = computed(() => 
+        ordenes.value.filter(o => o.estado === 'en_proceso')
+    );
+
+    const ordenesCompletadas = computed(() => 
+        ordenes.value.filter(o => o.estado === 'completada')
+    );
+
+    const ordenesCanceladas = computed(() => 
+        ordenes.value.filter(o => o.estado === 'cancelada')
+    );
+
+    // Cargar órdenes
     const loadOrdenes = async (params = {}) => {
         loading.value = true;
-        error.value = null;
         try {
-            const response = await ordenProduccionService.getOrdenes({
-                ...filtros.value,
-                ...params
-            });
-            ordenes.value = response.data.data || response.data;
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al cargar órdenes';
-            console.error('Error al cargar órdenes:', err);
-            throw err;
+            const response = await ordenProduccionService.getOrdenes(params);
+            ordenes.value = response.data.data.data || response.data.data || [];
+        } catch (error) {
+            console.error('Error al cargar órdenes:', error);
+            ordenes.value = [];
         } finally {
             loading.value = false;
         }
     };
 
-    // Cargar estadísticas
-    const loadEstadisticas = async () => {
-        try {
-            const response = await ordenProduccionService.getEstadisticas();
-            estadisticas.value = response.data;
-            return response.data;
-        } catch (err) {
-            console.error('Error al cargar estadísticas:', err);
-            throw err;
-        }
+    // Aplicar filtros
+    const aplicarFiltros = async () => {
+        const params = {};
+        if (filtros.value.estado) params.estado = filtros.value.estado;
+        if (filtros.value.prioridad) params.prioridad = filtros.value.prioridad;
+        if (filtros.value.producto_id) params.producto_id = filtros.value.producto_id;
+        if (filtros.value.maquina_id) params.maquina_id = filtros.value.maquina_id;
+        if (filtros.value.fecha_desde) params.fecha_desde = filtros.value.fecha_desde;
+        if (filtros.value.fecha_hasta) params.fecha_hasta = filtros.value.fecha_hasta;
+        
+        await loadOrdenes(params);
     };
 
-    // Obtener una orden específica
-    const getOrden = async (id) => {
-        loading.value = true;
-        error.value = null;
-        try {
-            const response = await ordenProduccionService.getOrden(id);
-            ordenActual.value = response.data;
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al cargar orden';
-            console.error('Error al cargar orden:', err);
-            throw err;
-        } finally {
-            loading.value = false;
-        }
+    // Limpiar filtros
+    const limpiarFiltros = async () => {
+        filtros.value = {
+            estado: '',
+            prioridad: '',
+            producto_id: '',
+            maquina_id: '',
+            fecha_desde: '',
+            fecha_hasta: ''
+        };
+        await loadOrdenes();
     };
 
-    // Crear nueva orden
+    // Crear orden
     const createOrden = async (data) => {
         loading.value = true;
-        error.value = null;
         try {
-            const response = await ordenProduccionService.createOrden(data);
-            await loadOrdenes(); // Recargar lista
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al crear orden';
-            console.error('Error al crear orden:', err);
-            throw err;
+            await ordenProduccionService.createOrden(data);
+            await loadOrdenes();
+        } catch (error) {
+            console.error('Error al crear orden:', error);
+            throw error;
         } finally {
             loading.value = false;
         }
@@ -87,149 +87,74 @@ export function useOrdenes() {
     // Actualizar orden
     const updateOrden = async (id, data) => {
         loading.value = true;
-        error.value = null;
         try {
-            const response = await ordenProduccionService.updateOrden(id, data);
-            await loadOrdenes(); // Recargar lista
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al actualizar orden';
-            console.error('Error al actualizar orden:', err);
-            throw err;
+            await ordenProduccionService.updateOrden(id, data);
+            await loadOrdenes();
+        } catch (error) {
+            console.error('Error al actualizar orden:', error);
+            throw error;
         } finally {
             loading.value = false;
         }
     };
 
-    // Eliminar orden
-    const deleteOrden = async (id) => {
-        loading.value = true;
-        error.value = null;
-        try {
-            await ordenProduccionService.deleteOrden(id);
-            ordenes.value = ordenes.value.filter(o => o.id !== id);
-        } catch (err) {
-            error.value = 'Error al eliminar orden';
-            console.error('Error al eliminar orden:', err);
-            throw err;
-        } finally {
-            loading.value = false;
-        }
-    };
-
-    // Iniciar producción
+    // Iniciar orden
     const iniciarOrden = async (id) => {
         loading.value = true;
-        error.value = null;
         try {
-            const response = await ordenProduccionService.iniciarProduccion(id);
-            await loadOrdenes(); // Recargar lista
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al iniciar orden';
-            console.error('Error al iniciar orden:', err);
-            throw err;
+            await ordenProduccionService.iniciarOrden(id);
+            await loadOrdenes();
+        } catch (error) {
+            console.error('Error al iniciar orden:', error);
+            throw error;
         } finally {
             loading.value = false;
         }
     };
 
-    // Finalizar producción
-    const finalizarOrden = async (id, data) => {
+    // Finalizar orden
+    const finalizarOrden = async (id, data = {}) => {
         loading.value = true;
-        error.value = null;
         try {
-            const response = await ordenProduccionService.finalizarProduccion(id, data);
-            await loadOrdenes(); // Recargar lista
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al finalizar orden';
-            console.error('Error al finalizar orden:', err);
-            throw err;
+            await ordenProduccionService.finalizarOrden(id, data);
+            await loadOrdenes();
+        } catch (error) {
+            console.error('Error al finalizar orden:', error);
+            throw error;
         } finally {
             loading.value = false;
         }
     };
 
     // Cancelar orden
-    const cancelarOrden = async (id, motivo) => {
+    const cancelarOrden = async (id, data = {}) => {
         loading.value = true;
-        error.value = null;
         try {
-            const response = await ordenProduccionService.cancelarOrden(id, { motivo });
-            await loadOrdenes(); // Recargar lista
-            return response.data;
-        } catch (err) {
-            error.value = 'Error al cancelar orden';
-            console.error('Error al cancelar orden:', err);
-            throw err;
+            await ordenProduccionService.cancelarOrden(id, data);
+            await loadOrdenes();
+        } catch (error) {
+            console.error('Error al cancelar orden:', error);
+            throw error;
         } finally {
             loading.value = false;
         }
     };
 
-    // Computed
-    const ordenesPendientes = computed(() =>
-        ordenes.value.filter(o => o.estado === 'pendiente')
-    );
-
-    const ordenesEnProceso = computed(() =>
-        ordenes.value.filter(o => o.estado === 'en_proceso')
-    );
-
-    const ordenesCompletadas = computed(() =>
-        ordenes.value.filter(o => o.estado === 'completada')
-    );
-
-    const ordenesCanceladas = computed(() =>
-        ordenes.value.filter(o => o.estado === 'cancelada')
-    );
-
-    // Aplicar filtros
-    const aplicarFiltros = async (nuevosFiltros) => {
-        filtros.value = { ...filtros.value, ...nuevosFiltros };
-        await loadOrdenes();
-    };
-
-    // Limpiar filtros
-    const limpiarFiltros = async () => {
-        filtros.value = {
-            estado: '',
-            prioridad: '',
-            producto_id: null,
-            maquina_id: null,
-            fecha_desde: '',
-            fecha_hasta: '',
-        };
-        await loadOrdenes();
-    };
-
     return {
-        // Estado
-        loading,
         ordenes,
-        ordenActual,
-        estadisticas,
-        error,
+        loading,
         filtros,
-
-        // Computed
         ordenesPendientes,
         ordenesEnProceso,
         ordenesCompletadas,
         ordenesCanceladas,
-
-        // Métodos
         loadOrdenes,
-        loadEstadisticas,
-        getOrden,
-        createOrden,
-        updateOrden,
-        deleteOrden,
-        iniciarOrden,
-        finalizarOrden,
-        cancelarOrden,
         aplicarFiltros,
         limpiarFiltros,
+        createOrden,
+        updateOrden,
+        iniciarOrden,
+        finalizarOrden,
+        cancelarOrden
     };
 }
