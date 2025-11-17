@@ -76,9 +76,20 @@ class RolePermissionController extends Controller
         $role = Role::findOrFail($roleId);
         $request->validate([
             'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id',
+            'permissions.*' => 'exists:spatie_permissions,id',
         ]);
         $role->syncPermissions($request->permissions);
-        return response()->json(['message' => 'Permisos asignados']);
+        return response()->json(['message' => 'Permisos asignados exitosamente']);
+    }
+
+    // Obtener permisos de un rol específico
+    public function getRolePermissions($roleId)
+    {
+        $role = Role::findOrFail($roleId);
+        $permissions = $role->permissions;
+        return response()->json([
+            'success' => true,
+            'data' => $permissions
+        ]);
     }
 }

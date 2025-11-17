@@ -9,6 +9,7 @@ import ProductosView from './components/Productos/ProductosView.vue';
 import MaquinasView from './components/Maquinas/MaquinasView.vue';
 import FormulacionesView from './components/Formulaciones/FormulacionesView.vue';
 import UsuariosView from './components/Usuarios/UsuariosView.vue';
+import RolesPermisosView from './components/RolesPermisos/RolesPermisosView.vue';
 import InsumosView from './components/Insumos/InsumosView.vue';
 import CategoriasInsumosView from './components/Insumos/CategoriasInsumosView.vue';
 
@@ -62,6 +63,11 @@ const routes = [
         path: '/usuarios',
         name: 'usuarios',
         component: UsuariosView,
+    },
+    {
+        path: '/roles-permisos',
+        name: 'roles-permisos',
+        component: RolesPermisosView,
     },
     {
         path: '/insumos',

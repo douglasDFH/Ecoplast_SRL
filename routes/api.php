@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::post('/spatie/roles', [RolePermissionController::class, 'storeRole']);
     Route::put('/spatie/roles/{id}', [RolePermissionController::class, 'updateRole']);
     Route::delete('/spatie/roles/{id}', [RolePermissionController::class, 'destroyRole']);
+    Route::get('/spatie/roles/{id}/permisos', [RolePermissionController::class, 'getRolePermissions']);
     Route::get('/spatie/permisos', [RolePermissionController::class, 'indexPermissions']);
     Route::post('/spatie/permisos', [RolePermissionController::class, 'storePermission']);
     Route::post('/spatie/roles/{id}/permisos', [RolePermissionController::class, 'assignPermissionsToRole']);

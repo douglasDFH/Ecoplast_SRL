@@ -10,64 +10,87 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Crear permisos básicos (sin eliminar existentes)
+        // Crear permisos básicos con descripciones
         $permissions = [
             // Usuarios
-            'ver usuarios',
-            'crear usuarios',
-            'editar usuarios',
-            'eliminar usuarios',
+            ['name' => 'ver usuarios', 'description' => 'Puede ver la lista de usuarios del sistema'],
+            ['name' => 'crear usuarios', 'description' => 'Puede crear nuevos usuarios'],
+            ['name' => 'editar usuarios', 'description' => 'Puede editar información de usuarios existentes'],
+            ['name' => 'eliminar usuarios', 'description' => 'Puede eliminar usuarios del sistema'],
 
             // Roles y permisos
-            'ver roles',
-            'crear roles',
-            'editar roles',
-            'eliminar roles',
-            'asignar permisos',
+            ['name' => 'ver roles', 'description' => 'Puede ver la lista de roles disponibles'],
+            ['name' => 'crear roles', 'description' => 'Puede crear nuevos roles'],
+            ['name' => 'editar roles', 'description' => 'Puede editar roles existentes'],
+            ['name' => 'eliminar roles', 'description' => 'Puede eliminar roles del sistema'],
+            ['name' => 'asignar permisos', 'description' => 'Puede asignar permisos a roles'],
 
             // Productos
-            'ver productos',
-            'crear productos',
-            'editar productos',
-            'eliminar productos',
+            ['name' => 'ver productos', 'description' => 'Puede ver la lista de productos'],
+            ['name' => 'crear productos', 'description' => 'Puede crear nuevos productos'],
+            ['name' => 'editar productos', 'description' => 'Puede editar productos existentes'],
+            ['name' => 'eliminar productos', 'description' => 'Puede eliminar productos'],
 
             // Órdenes
-            'ver ordenes',
-            'crear ordenes',
-            'editar ordenes',
-            'aprobar ordenes',
+            ['name' => 'ver ordenes', 'description' => 'Puede ver las órdenes de producción'],
+            ['name' => 'crear ordenes', 'description' => 'Puede crear nuevas órdenes de producción'],
+            ['name' => 'editar ordenes', 'description' => 'Puede editar órdenes existentes'],
+            ['name' => 'aprobar ordenes', 'description' => 'Puede aprobar órdenes de producción'],
 
             // Producción
-            'ver produccion',
-            'registrar produccion',
-            'editar produccion',
+            ['name' => 'ver produccion', 'description' => 'Puede ver registros de producción'],
+            ['name' => 'registrar produccion', 'description' => 'Puede registrar nueva producción'],
+            ['name' => 'editar produccion', 'description' => 'Puede editar registros de producción'],
 
             // Inventario
-            'ver inventario',
-            'ajustar inventario',
+            ['name' => 'ver inventario', 'description' => 'Puede ver el inventario de insumos y productos'],
+            ['name' => 'ajustar inventario', 'description' => 'Puede ajustar niveles de inventario'],
 
             // Calidad
-            'ver calidad',
-            'realizar inspecciones',
+            ['name' => 'ver calidad', 'description' => 'Puede ver inspecciones y registros de calidad'],
+            ['name' => 'realizar inspecciones', 'description' => 'Puede realizar inspecciones de calidad'],
 
             // Mantenimiento
-            'ver mantenimiento',
-            'programar mantenimiento',
+            ['name' => 'ver mantenimiento', 'description' => 'Puede ver registros de mantenimiento'],
+            ['name' => 'programar mantenimiento', 'description' => 'Puede programar mantenimientos'],
 
             // Dashboard
-            'ver dashboard',
-            'ver reportes',
+            ['name' => 'ver dashboard', 'description' => 'Puede acceder al dashboard principal'],
+            ['name' => 'ver reportes', 'description' => 'Puede ver reportes del sistema'],
         ];
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+        foreach ($permissions as $permissionData) {
+            if (is_array($permissionData)) {
+                Permission::firstOrCreate(
+                    ['name' => $permissionData['name']],
+                    ['description' => $permissionData['description']]
+                );
+            } else {
+                Permission::firstOrCreate(['name' => $permissionData]);
+            }
         }
 
-        // Crear roles básicos solo si no existen
-        $adminRole = Role::firstOrCreate(['name' => 'Administrador']);
-        $operadorRole = Role::firstOrCreate(['name' => 'Operador']);
-        $supervisorRole = Role::firstOrCreate(['name' => 'Supervisor']);
-        $calidadRole = Role::firstOrCreate(['name' => 'Control de Calidad']);
+        // Crear roles básicos con descripciones
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'Administrador'],
+            ['description' => 'Acceso completo a todas las funciones del sistema']
+        );
+        $operadorRole = Role::firstOrCreate(
+            ['name' => 'Operador'],
+            ['description' => 'Usuario básico para operaciones diarias de producción']
+        );
+        $supervisorRole = Role::firstOrCreate(
+            ['name' => 'Supervisor'],
+            ['description' => 'Supervisa operaciones y puede aprobar ciertas acciones']
+        );
+        $calidadRole = Role::firstOrCreate(
+            ['name' => 'Control de Calidad'],
+            ['description' => 'Encargado de inspecciones y control de calidad']
+        );
+        $invitadoRole = Role::firstOrCreate(
+            ['name' => 'Invitado'],
+            ['description' => 'Acceso limitado de solo lectura']
+        );
 
         // Asignar permisos a roles
         $adminRole->syncPermissions(Permission::all());
@@ -84,11 +107,15 @@ class RolePermissionSeeder extends Seeder
             'ver ordenes',
             'crear ordenes',
             'editar ordenes',
+            'aprobar ordenes',
             'ver produccion',
             'registrar produccion',
+            'editar produccion',
             'ver inventario',
+            'ajustar inventario',
             'ver calidad',
             'ver mantenimiento',
+            'programar mantenimiento',
             'ver reportes',
         ]);
 
@@ -98,6 +125,15 @@ class RolePermissionSeeder extends Seeder
             'realizar inspecciones',
             'ver productos',
             'ver ordenes',
+            'ver produccion',
+        ]);
+
+        $invitadoRole->syncPermissions([
+            'ver dashboard',
+            'ver ordenes',
+            'ver produccion',
+            'ver productos',
+            'ver calidad',
         ]);
 
         // Asignar rol de administrador al usuario admin si existe
