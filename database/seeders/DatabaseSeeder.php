@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
             TipoMaquinariaSeeder::class,
             MaquinariaSeeder::class,
             TurnoSeeder::class,
-            FormulacionSeeder::class, // Temporalmente deshabilitado - requiere productos
+            FormulacionSeeder::class, 
+            RolePermissionSeeder::class,
         ]);
     }
 }

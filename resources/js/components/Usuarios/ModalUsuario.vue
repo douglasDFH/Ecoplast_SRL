@@ -123,21 +123,27 @@
                         </h4>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-blue-800">
-                                    Rol <span class="text-red-500">*</span>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-3 text-blue-800">
+                                    Roles Asignados <span class="text-red-500">*</span>
                                 </label>
-                                <select
-                                    v-model="formData.rol_id"
-                                    required
-                                    class="modern-input w-full px-4 py-2.5 rounded-xl bg-white"
-                                    style="border: 2px solid #7DD3FC;"
-                                >
-                                    <option value="">Seleccionar rol...</option>
-                                    <option v-for="rol in roles" :key="rol.id" :value="rol.id">
-                                        {{ rol.nombre_rol }}
-                                    </option>
-                                </select>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <label v-for="rol in roles" :key="rol.id" 
+                                        class="flex items-center p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-blue-50"
+                                        :class="formData.roles.includes(rol.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                                        style="border-color: #7DD3FC;">
+                                        <input
+                                            type="checkbox"
+                                            :value="rol.id"
+                                            v-model="formData.roles"
+                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                        <span class="ml-3 text-sm font-medium text-gray-700">{{ rol.name }}</span>
+                                    </label>
+                                </div>
+                                <p v-if="formData.roles.length === 0" class="text-sm text-red-500 mt-2">
+                                    Debe seleccionar al menos un rol
+                                </p>
                             </div>
 
                             <div>
@@ -277,21 +283,16 @@ const formData = reactive({
     telefono: props.usuario?.telefono || '',
     dni: props.usuario?.dni || '',
     direccion: props.usuario?.direccion || '',
-    rol_id: props.usuario?.rol_id || '',
+    roles: props.usuario?.roles?.map(r => r.id) || [],
     turno_id: props.usuario?.turno_id || '',
     password: '',
     password_confirmation: '',
     activo: props.usuario?.activo !== undefined ? Boolean(props.usuario.activo) : true
 });
 
-const rolSeleccionado = computed(() => {
-    if (!formData.rol_id) return null;
-    return props.roles.find(r => r.id === parseInt(formData.rol_id));
-});
-
 const isFormValid = computed(() => {
     // Validaciones básicas
-    if (!formData.nombre_completo || !formData.email || !formData.rol_id) {
+    if (!formData.nombre_completo || !formData.email || formData.roles.length === 0) {
         return false;
     }
 
@@ -321,7 +322,7 @@ const handleSubmit = async () => {
             telefono: formData.telefono || null,
             dni: formData.dni || null,
             direccion: formData.direccion || null,
-            rol_id: formData.rol_id,
+            roles: formData.roles,
             turno_id: formData.turno_id || null,
             activo: formData.activo ? 1 : 0
         };

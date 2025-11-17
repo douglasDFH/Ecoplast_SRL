@@ -77,7 +77,7 @@
                     >
                         <option value="">Todos los roles</option>
                         <option v-for="rol in roles" :key="rol.id" :value="rol.id">
-                            {{ rol.nombre_rol }}
+                            {{ rol.name }}
                         </option>
                     </select>
                     <select
@@ -166,10 +166,18 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                                    :style="getRolBadgeStyle(usuario.rol?.nombre_rol)">
-                                    {{ usuario.rol?.nombre_rol || 'Sin rol' }}
-                                </span>
+                                <div class="flex flex-wrap gap-1">
+                                    <span v-if="!usuario.roles || usuario.roles.length === 0" 
+                                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                        style="background: #F3F4F6; color: #374151;">
+                                        Sin rol
+                                    </span>
+                                    <span v-else v-for="rol in usuario.roles" :key="rol.id"
+                                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                        :style="getRolBadgeStyle(rol.name)">
+                                        {{ rol.name }}
+                                    </span>
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <span v-if="usuario.telefono" class="text-sm text-gray-700">{{ usuario.telefono }}</span>
@@ -271,7 +279,7 @@ const usuariosFiltrados = computed(() => {
             usuario.email?.toLowerCase().includes(filtros.value.busqueda.toLowerCase());
 
         const matchRol = !filtros.value.rol_id ||
-            usuario.rol_id === parseInt(filtros.value.rol_id);
+            usuario.roles?.some(r => r.id === parseInt(filtros.value.rol_id));
 
         const matchActivo = filtros.value.activo === '' ||
             usuario.activo === parseInt(filtros.value.activo);
@@ -285,11 +293,11 @@ const usuariosActivos = computed(() =>
 );
 
 const usuariosAdmin = computed(() =>
-    usuarios.value.filter(u => u.rol?.nombre_rol === 'Administrador').length
+    usuarios.value.filter(u => u.roles?.some(r => r.name === 'Administrador')).length
 );
 
 const usuariosOperadores = computed(() =>
-    usuarios.value.filter(u => u.rol?.nombre_rol === 'Operador de Producción').length
+    usuarios.value.filter(u => u.roles?.some(r => r.name === 'Operador')).length
 );
 
 // Methods
@@ -312,7 +320,7 @@ const loadUsuarios = async () => {
 
 const loadRoles = async () => {
     try {
-        const response = await api.get('/roles');
+        const response = await api.get('/spatie/roles');
         roles.value = response.data.data || response.data || [];
     } catch (error) {
         console.error('Error al cargar roles:', error);
@@ -436,10 +444,9 @@ const getAvatarStyle = (nombre) => {
 const getRolBadgeStyle = (rol) => {
     const styles = {
         'Administrador': 'background: #DBEAFE; color: #1E40AF;',
-        'Supervisor de Producción': 'background: #D1FAE5; color: #065F46;',
-        'Operador de Producción': 'background: #FEF3C7; color: #92400E;',
-        'Control de Calidad': 'background: #FCE7F3; color: #9F1239;',
-        'Logística e Inventario': 'background: #E0E7FF; color: #3730A3;'
+        'Supervisor': 'background: #D1FAE5; color: #065F46;',
+        'Operador': 'background: #FEF3C7; color: #92400E;',
+        'Invitado': 'background: #FCE7F3; color: #9F1239;'
     };
     return styles[rol] || 'background: #F3F4F6; color: #374151;';
 };

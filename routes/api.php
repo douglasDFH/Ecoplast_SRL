@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\TurnoController;
 use App\Http\Controllers\Api\FormulacionController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\CategoriaInsumoController;
+use App\Http\Controllers\Api\RolePermissionController;
+use App\Http\Controllers\Api\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -25,31 +27,18 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
-    // Usuarios (simple endpoint para obtener listado)
-    Route::get('/usuarios', function () {
-        return response()->json([
-            'success' => true,
-            'data' => \Illuminate\Support\Facades\DB::table('usuarios')
-                ->leftJoin('roles', 'usuarios.rol_id', '=', 'roles.id')
-                ->select(
-                    'usuarios.*',
-                    'roles.nombre_rol',
-                    'roles.descripcion as rol_descripcion',
-                    'roles.nivel_acceso'
-                )
-                ->get()
-                ->map(function ($usuario) {
-                    $usuario->rol = $usuario->nombre_rol ? [
-                        'id' => $usuario->rol_id,
-                        'nombre_rol' => $usuario->nombre_rol,
-                        'descripcion' => $usuario->rol_descripcion,
-                        'nivel_acceso' => $usuario->nivel_acceso
-                    ] : null;
-                    unset($usuario->nombre_rol, $usuario->rol_descripcion, $usuario->nivel_acceso);
-                    return $usuario;
-                })
-        ]);
-    });
+    // Gestión de Roles y Permisos (Spatie)
+    Route::get('/spatie/roles', [RolePermissionController::class, 'indexRoles']);
+    Route::post('/spatie/roles', [RolePermissionController::class, 'storeRole']);
+    Route::put('/spatie/roles/{id}', [RolePermissionController::class, 'updateRole']);
+    Route::delete('/spatie/roles/{id}', [RolePermissionController::class, 'destroyRole']);
+    Route::get('/spatie/permisos', [RolePermissionController::class, 'indexPermissions']);
+    Route::post('/spatie/permisos', [RolePermissionController::class, 'storePermission']);
+    Route::post('/spatie/roles/{id}/permisos', [RolePermissionController::class, 'assignPermissionsToRole']);
+
+    // Gestión de Usuarios
+    Route::apiResource('usuarios', UserController::class);
+    Route::post('usuarios/{usuario}/reset-password', [UserController::class, 'resetPassword']);
 
     // Roles (simple endpoint para obtener listado)
     Route::get('/roles', function () {

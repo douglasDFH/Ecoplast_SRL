@@ -12,15 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         $teams = config('permission.teams');
-        $tableNames = config('permission.table_names');
         $columnNames = config('permission.column_names');
         $pivotRole = $columnNames['role_pivot_key'] ?? 'role_id';
         $pivotPermission = $columnNames['permission_pivot_key'] ?? 'permission_id';
 
-        throw_if(empty($tableNames), Exception::class, 'Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         throw_if($teams && empty($columnNames['team_foreign_key'] ?? null), Exception::class, 'Error: team_foreign_key on config/permission.php not loaded. Run [php artisan config:clear] and try again.');
 
-        Schema::create($tableNames['permissions'], static function (Blueprint $table) {
+        Schema::create('spatie_permissions', static function (Blueprint $table) {
             // $table->engine('InnoDB');
             $table->bigIncrements('id'); // permission id
             $table->string('name');       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
@@ -30,7 +28,7 @@ return new class extends Migration
             $table->unique(['name', 'guard_name']);
         });
 
-        Schema::create($tableNames['roles'], static function (Blueprint $table) use ($teams, $columnNames) {
+        Schema::create('spatie_roles', static function (Blueprint $table) use ($teams, $columnNames) {
             // $table->engine('InnoDB');
             $table->bigIncrements('id'); // role id
             if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
@@ -47,7 +45,7 @@ return new class extends Migration
             }
         });
 
-        Schema::create($tableNames['model_has_permissions'], static function (Blueprint $table) use ($tableNames, $columnNames, $pivotPermission, $teams) {
+        Schema::create('spatie_model_has_permissions', static function (Blueprint $table) use ($columnNames, $pivotPermission, $teams) {
             $table->unsignedBigInteger($pivotPermission);
 
             $table->string('model_type');
@@ -56,7 +54,7 @@ return new class extends Migration
 
             $table->foreign($pivotPermission)
                 ->references('id') // permission id
-                ->on($tableNames['permissions'])
+                ->on('spatie_permissions')
                 ->onDelete('cascade');
             if ($teams) {
                 $table->unsignedBigInteger($columnNames['team_foreign_key']);
@@ -71,7 +69,7 @@ return new class extends Migration
 
         });
 
-        Schema::create($tableNames['model_has_roles'], static function (Blueprint $table) use ($tableNames, $columnNames, $pivotRole, $teams) {
+        Schema::create('spatie_model_has_roles', static function (Blueprint $table) use ($columnNames, $pivotRole, $teams) {
             $table->unsignedBigInteger($pivotRole);
 
             $table->string('model_type');
@@ -80,7 +78,7 @@ return new class extends Migration
 
             $table->foreign($pivotRole)
                 ->references('id') // role id
-                ->on($tableNames['roles'])
+                ->on('spatie_roles')
                 ->onDelete('cascade');
             if ($teams) {
                 $table->unsignedBigInteger($columnNames['team_foreign_key']);
@@ -94,18 +92,18 @@ return new class extends Migration
             }
         });
 
-        Schema::create($tableNames['role_has_permissions'], static function (Blueprint $table) use ($tableNames, $pivotRole, $pivotPermission) {
+        Schema::create('spatie_role_has_permissions', static function (Blueprint $table) use ($pivotRole, $pivotPermission) {
             $table->unsignedBigInteger($pivotPermission);
             $table->unsignedBigInteger($pivotRole);
 
             $table->foreign($pivotPermission)
                 ->references('id') // permission id
-                ->on($tableNames['permissions'])
+                ->on('spatie_permissions')
                 ->onDelete('cascade');
 
             $table->foreign($pivotRole)
                 ->references('id') // role id
-                ->on($tableNames['roles'])
+                ->on('spatie_roles')
                 ->onDelete('cascade');
 
             $table->primary([$pivotPermission, $pivotRole], 'role_has_permissions_permission_id_role_id_primary');
@@ -121,14 +119,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableNames = config('permission.table_names');
-
-        throw_if(empty($tableNames), Exception::class, 'Error: config/permission.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
-
-        Schema::drop($tableNames['role_has_permissions']);
-        Schema::drop($tableNames['model_has_roles']);
-        Schema::drop($tableNames['model_has_permissions']);
-        Schema::drop($tableNames['roles']);
-        Schema::drop($tableNames['permissions']);
+        Schema::drop('spatie_role_has_permissions');
+        Schema::drop('spatie_model_has_roles');
+        Schema::drop('spatie_model_has_permissions');
+        Schema::drop('spatie_roles');
+        Schema::drop('spatie_permissions');
     }
 };

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Traits\HasPermissions;
 use Carbon\Carbon;
 use App\Models\AsignacionTurno;
 use App\Models\OrdenProduccion;
@@ -20,7 +21,7 @@ use App\Models\MovimientoInventarioProducto;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, HasPermissions;
 
     /**
      * The table associated with the model.
