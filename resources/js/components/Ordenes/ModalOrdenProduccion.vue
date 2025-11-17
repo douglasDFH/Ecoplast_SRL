@@ -343,7 +343,7 @@ const handleSubmit = async () => {
 
 const loadProductos = async () => {
     try {
-        const response = await api.get('/productos-terminados');
+        const response = await api.get('/productos');
         // Manejar respuesta paginada
         productos.value = response.data.data?.data || response.data.data || response.data || [];
     } catch (error) {

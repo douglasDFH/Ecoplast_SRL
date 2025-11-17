@@ -75,9 +75,9 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('insumos/biodegradables', [InsumoController::class, 'biodegradables']);
 
     // Rutas para Productos Terminados biodegradables
-    Route::apiResource('productos-terminados', ProductoTerminadoController::class);
-    Route::get('productos-terminados/estadisticas/general', [ProductoTerminadoController::class, 'estadisticas']);
-    Route::get('productos-terminados/por-sostenibilidad', [ProductoTerminadoController::class, 'porSostenibilidad']);
+    Route::apiResource('productos', ProductoTerminadoController::class);
+    Route::get('productos/estadisticas/general', [ProductoTerminadoController::class, 'estadisticas']);
+    Route::get('productos/por-sostenibilidad', [ProductoTerminadoController::class, 'porSostenibilidad']);
 
     // Rutas para Maquinaria
     Route::apiResource('maquinaria', MaquinariaController::class);

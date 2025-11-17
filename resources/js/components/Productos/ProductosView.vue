@@ -288,7 +288,7 @@ const productosStockBajo = computed(() =>
 const loadProductos = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/productos-terminados');
+        const response = await api.get('/productos');
         // ProductoTerminadoController returns paginated data in response.data.data.data
         if (response.data.data && response.data.data.data) {
             productos.value = response.data.data.data;
@@ -318,9 +318,9 @@ const cerrarModal = () => {
 const guardarProducto = async (data) => {
     try {
         if (productoSeleccionado.value) {
-            await api.put(`/productos-terminados/${productoSeleccionado.value.id}`, data);
+            await api.put(`/productos/${productoSeleccionado.value.id}`, data);
         } else {
-            await api.post('/productos-terminados', data);
+            await api.post('/productos', data);
         }
         await loadProductos();
         cerrarModal();
@@ -335,7 +335,7 @@ const toggleActivo = async (producto) => {
         return;
     }
     try {
-        await api.put(`/productos-terminados/${producto.id}`, {
+        await api.put(`/productos/${producto.id}`, {
             ...producto,
             activo: !producto.activo
         });
@@ -351,7 +351,7 @@ const eliminarProducto = async (producto) => {
         return;
     }
     try {
-        await api.delete(`/productos-terminados/${producto.id}`);
+        await api.delete(`/productos/${producto.id}`);
         await loadProductos();
     } catch (error) {
         console.error('Error al eliminar producto:', error);
