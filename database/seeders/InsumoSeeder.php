@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Insumo;
 
 class InsumoSeeder extends Seeder
 {
@@ -26,6 +27,7 @@ class InsumoSeeder extends Seeder
             [
                 'codigo_insumo' => 'PLA-001',
                 'nombre_insumo' => 'PLA Ingeo 4043D',
+                'descripcion' => 'Poliláctico biodegradable de alta calidad, ideal para aplicaciones de empaque y productos desechables',
                 'categoria_id' => 1,
                 'tipo_material' => 'PLA', // Mantener temporalmente para compatibilidad
                 'tipo_material_id' => $tiposPLA->id,
@@ -42,6 +44,7 @@ class InsumoSeeder extends Seeder
             [
                 'codigo_insumo' => 'PHA-001',
                 'nombre_insumo' => 'PHA Mirel P1001',
+                'descripcion' => 'Poli-hidroxialcanoato biodegradable, excelente resistencia al agua y propiedades mecánicas superiores',
                 'categoria_id' => 1,
                 'tipo_material' => 'PHA', // Mantener temporalmente para compatibilidad
                 'tipo_material_id' => $tiposPHA->id,
@@ -58,6 +61,7 @@ class InsumoSeeder extends Seeder
             [
                 'codigo_insumo' => 'PBS-001',
                 'nombre_insumo' => 'PBS Bionolle 1020',
+                'descripcion' => 'Poli-butileno succinato biodegradable, excelente procesabilidad y resistencia térmica',
                 'categoria_id' => 1,
                 'tipo_material' => 'PBS', // Mantener temporalmente para compatibilidad
                 'tipo_material_id' => $tiposPBS->id,
@@ -74,6 +78,7 @@ class InsumoSeeder extends Seeder
             [
                 'codigo_insumo' => 'PBAT-001',
                 'nombre_insumo' => 'PBAT Ecoflex F Blend C1200',
+                'descripcion' => 'Poli-butileno adipato tereftalato biodegradable, alta flexibilidad y resistencia al impacto',
                 'categoria_id' => 1,
                 'tipo_material' => 'PBAT', // Mantener temporalmente para compatibilidad
                 'tipo_material_id' => $tiposPBAT->id,
@@ -90,6 +95,7 @@ class InsumoSeeder extends Seeder
             [
                 'codigo_insumo' => 'TPS-001',
                 'nombre_insumo' => 'Almidón de Maíz Termoplástico',
+                'descripcion' => 'Almidón termoplástico biodegradable, económico y de origen natural renovable',
                 'categoria_id' => 2,
                 'tipo_material' => 'Almidon', // Mantener temporalmente para compatibilidad
                 'tipo_material_id' => $tiposAlmidon->id,
@@ -105,6 +111,11 @@ class InsumoSeeder extends Seeder
             ],
         ];
 
-        DB::table('insumos')->insert($insumos);
+        foreach ($insumos as $insumo) {
+            Insumo::updateOrCreate(
+                ['codigo_insumo' => $insumo['codigo_insumo']],
+                $insumo
+            );
+        }
     }
 }

@@ -48,6 +48,7 @@ class Insumo extends Model
     protected $fillable = [
         'codigo_insumo',
         'nombre_insumo',
+        'descripcion',
         'categoria_id',
         'tipo_material_id',
         'tipo_material', // Mantener temporalmente para compatibilidad
