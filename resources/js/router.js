@@ -13,6 +13,7 @@ import RolesPermisosView from './components/RolesPermisos/RolesPermisosView.vue'
 import InsumosView from './components/Insumos/InsumosView.vue';
 import CategoriasInsumosView from './components/Insumos/CategoriasInsumosView.vue';
 import TiposMaterialesView from './components/TiposMateriales/TiposMaterialesView.vue';
+import ProveedoresView from './components/Proveedores/ProveedoresView.vue';
 
 const routes = [
     {
@@ -84,6 +85,11 @@ const routes = [
         path: '/tipos-materiales',
         name: 'tipos-materiales',
         component: TiposMaterialesView,
+    },
+    {
+        path: '/proveedores',
+        name: 'proveedores',
+        component: ProveedoresView,
     },
 ];
 

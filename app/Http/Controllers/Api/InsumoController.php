@@ -28,7 +28,7 @@ class InsumoController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Insumo::with(['categoria', 'tipoMaterial']);
+        $query = Insumo::with(['categoria', 'tipoMaterial', 'proveedor']);
 
         // Filtros
         if ($request->has('categoria_id')) {

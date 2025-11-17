@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\FormulacionController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\CategoriaInsumoController;
 use App\Http\Controllers\Api\TipoMaterialController;
+use App\Http\Controllers\Api\ProveedorController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\UserController;
 
@@ -66,6 +67,14 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('tipos-materiales/clasificacion/{clasificacion}', [TipoMaterialController::class, 'porClasificacion']);
     Route::get('tipos-materiales/biodegradables', [TipoMaterialController::class, 'biodegradables']);
     Route::patch('tipos-materiales/{id}/toggle-activo', [TipoMaterialController::class, 'toggleActivo']);
+
+    // Rutas para Proveedores
+    Route::apiResource('proveedores', ProveedorController::class);
+    Route::get('proveedores/estadisticas/general', [ProveedorController::class, 'estadisticas']);
+    Route::get('proveedores/ciudad/{ciudad}', [ProveedorController::class, 'porCiudad']);
+    Route::get('proveedores/pais/{pais}', [ProveedorController::class, 'porPais']);
+    Route::patch('proveedores/{id}/toggle-activo', [ProveedorController::class, 'toggleActivo']);
+    Route::get('proveedores/{id}/insumos', [ProveedorController::class, 'insumos']);
 
     // Rutas para Insumos biodegradables
     Route::apiResource('insumos', InsumoController::class);

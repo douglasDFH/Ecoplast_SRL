@@ -111,13 +111,16 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Proveedor
                         </label>
-                        <input
-                            v-model="form.proveedor"
-                            type="text"
-                            placeholder="Nombre del proveedor"
+                        <select
+                            v-model="form.proveedor_id"
                             class="modern-input w-full px-4 py-2.5 rounded-xl"
                             style="background: #F8FAFC; border: 2px solid #E2E8F0;"
-                        />
+                        >
+                            <option value="">Seleccionar proveedor...</option>
+                            <option v-for="prov in proveedores" :key="prov.id" :value="prov.id">
+                                {{ prov.nombre_comercial }}
+                            </option>
+                        </select>
                     </div>
                 </div>
 
@@ -296,7 +299,8 @@ const form = ref({
     densidad: null,
     temperatura_fusion: null,
     certificacion_biodegradable: '',
-    proveedor: '',
+    proveedor_id: '',
+    proveedor: '', // Mantener temporalmente para compatibilidad
     precio_unitario: 0,
     stock_minimo: 0,
     stock_actual: 0,
@@ -306,6 +310,7 @@ const form = ref({
 const saving = ref(false);
 const errorMsg = ref('');
 const tiposMateriales = ref([]);
+const proveedores = ref([]);
 
 // Cargar tipos de materiales
 const cargarTiposMateriales = async () => {
@@ -321,8 +326,23 @@ const cargarTiposMateriales = async () => {
     }
 };
 
+// Cargar proveedores
+const cargarProveedores = async () => {
+    try {
+        const response = await axios.get('/api/proveedores', {
+            params: { all: true, activo: true }
+        });
+        if (response.data && response.data.data) {
+            proveedores.value = response.data.data;
+        }
+    } catch (error) {
+        console.error('Error al cargar proveedores:', error);
+    }
+};
+
 onMounted(() => {
     cargarTiposMateriales();
+    cargarProveedores();
 });
 
 // Watch para cargar datos cuando se edita
@@ -337,6 +357,7 @@ watch(() => props.insumo, (newInsumo) => {
             densidad: newInsumo.densidad || null,
             temperatura_fusion: newInsumo.temperatura_fusion || null,
             certificacion_biodegradable: newInsumo.certificacion_biodegradable || '',
+            proveedor_id: newInsumo.proveedor_id || '',
             proveedor: newInsumo.proveedor || '',
             precio_unitario: newInsumo.precio_unitario || 0,
             stock_minimo: newInsumo.stock_minimo || 0,
@@ -353,6 +374,7 @@ watch(() => props.insumo, (newInsumo) => {
             densidad: null,
             temperatura_fusion: null,
             certificacion_biodegradable: '',
+            proveedor_id: '',
             proveedor: '',
             precio_unitario: 0,
             stock_minimo: 0,

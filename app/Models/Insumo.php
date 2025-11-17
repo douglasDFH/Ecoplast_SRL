@@ -56,7 +56,8 @@ class Insumo extends Model
         'densidad',
         'temperatura_fusion',
         'certificacion_biodegradable',
-        'proveedor',
+        'proveedor_id',
+        'proveedor', // Mantener temporalmente para compatibilidad
         'precio_unitario',
         'stock_minimo',
         'stock_actual',
@@ -108,6 +109,14 @@ class Insumo extends Model
     public function tipoMaterial(): BelongsTo
     {
         return $this->belongsTo(TipoMaterial::class, 'tipo_material_id');
+    }
+
+    /**
+     * Proveedor de este insumo.
+     */
+    public function proveedor(): BelongsTo
+    {
+        return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
 
     /**

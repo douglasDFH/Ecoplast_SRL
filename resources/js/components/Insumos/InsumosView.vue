@@ -153,7 +153,9 @@
                             <td class="px-6 py-4">
                                 <div>
                                     <p class="font-semibold text-gray-900">{{ insumo.nombre_insumo }}</p>
-                                    <p v-if="insumo.proveedor" class="text-xs text-gray-500">{{ insumo.proveedor }}</p>
+                                    <p v-if="insumo.proveedor?.nombre_comercial || insumo.proveedor" class="text-xs text-gray-500">
+                                        {{ insumo.proveedor?.nombre_comercial || insumo.proveedor }}
+                                    </p>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -368,7 +370,7 @@ const verDetalle = (insumo) => {
         insumo.densidad ? `Densidad: ${insumo.densidad} g/cm³` : '',
         insumo.temperatura_fusion ? `Temp. Fusión: ${insumo.temperatura_fusion}°C` : '',
         insumo.certificacion_biodegradable ? `Certificación: ${insumo.certificacion_biodegradable}` : '',
-        insumo.proveedor ? `Proveedor: ${insumo.proveedor}` : ''
+        (insumo.proveedor?.nombre_comercial || insumo.proveedor) ? `Proveedor: ${insumo.proveedor?.nombre_comercial || insumo.proveedor}` : ''
     ].filter(Boolean).join('\n');
 
     alert(detalles);

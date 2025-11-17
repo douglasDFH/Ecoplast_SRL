@@ -67,5 +67,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tipos-materiales', function () {
         return view('dashboard');
     });
+
+    Route::get('/proveedores', function () {
+        return view('dashboard');
+    });
 });
 
