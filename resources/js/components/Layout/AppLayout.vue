@@ -43,7 +43,7 @@
                     </router-link>
 
                     <router-link
-                        to="/produccion"
+                        to="/panel-maquinas"
                         class="flex items-center px-5 py-3 rounded-2xl font-medium transition-all active:scale-95"
                         :class="$route.path === '/produccion' ? 'nav-link-active' : 'nav-link'"
                     >
@@ -283,6 +283,7 @@ const pageTitle = computed(() => {
         '/': 'Dashboard Gerencia',
         '/ordenes': 'Órdenes de Producción',
         '/produccion': 'Registro de Producción',
+        '/panel-maquinas': 'Panel de control de máquinas en tiempo real',
         '/inventario': 'Gestión de Inventario',
         '/calidad': 'Control de Calidad',
         '/mantenimiento': 'Mantenimiento',
@@ -314,6 +315,7 @@ const pageSubtitle = computed(() => {
         '/categorias-insumos': 'Clasificación de insumos por categoría',
         '/tipos-materiales': 'Gestión de tipos de materiales biodegradables',
         '/proveedores': 'Gestión de proveedores de insumos biodegradables',
+        '/panel-maquinas': 'Panel de control de máquinas en tiempo real'
     };
     return subtitles[route.path] || 'Bienvenido al sistema de gestión';
 });

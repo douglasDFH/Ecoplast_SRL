@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\ProveedorController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\MovimientoInventarioController;
+use App\Http\Controllers\Api\PanelMaquinasController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -101,6 +102,13 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('maquinaria/por-estado', [MaquinariaController::class, 'porEstado']);
     Route::get('maquinaria/necesitan-mantenimiento', [MaquinariaController::class, 'necesitanMantenimiento']);
     Route::patch('maquinaria/{maquina}/estado', [MaquinariaController::class, 'actualizarEstado']);
+
+    // Rutas para Panel de Máquinas (Simulación en Tiempo Real)
+    Route::get('panel-maquinas', [PanelMaquinasController::class, 'index']);
+    Route::post('panel-maquinas/iniciar-produccion', [PanelMaquinasController::class, 'iniciarProduccion']);
+    Route::post('panel-maquinas/simular-ciclo', [PanelMaquinasController::class, 'simularCiclo']);
+    Route::post('panel-maquinas/completar-produccion/{id}', [PanelMaquinasController::class, 'completarProduccion']);
+    Route::post('panel-maquinas/toggle-pausa', [PanelMaquinasController::class, 'togglePausa']);
 
     // Rutas para Órdenes de Producción
     Route::apiResource('ordenes-produccion', OrdenProduccionController::class);

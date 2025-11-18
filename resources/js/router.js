@@ -14,6 +14,7 @@ import InsumosView from './components/Insumos/InsumosView.vue';
 import CategoriasInsumosView from './components/Insumos/CategoriasInsumosView.vue';
 import TiposMaterialesView from './components/TiposMateriales/TiposMaterialesView.vue';
 import ProveedoresView from './components/Proveedores/ProveedoresView.vue';
+import PanelMaquinasView from './components/PanelMaquinas/PanelMaquinasView.vue';
 
 const routes = [
     {
@@ -90,6 +91,11 @@ const routes = [
         path: '/proveedores',
         name: 'proveedores',
         component: ProveedoresView,
+    },
+    {
+        path: '/panel-maquinas',
+        name: 'panel-maquinas',
+        component: PanelMaquinasView,
     },
 ];
 

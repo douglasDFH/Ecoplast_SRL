@@ -71,5 +71,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/proveedores', function () {
         return view('dashboard');
     });
+
+    Route::get('/panel-maquinas', function () {
+        return view('dashboard');
+    });
 });
 
